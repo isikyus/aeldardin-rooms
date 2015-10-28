@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Knossos Tests</title>
+    <!--
+      Written with reference to
+        <https://qunitjs.com/>
+        and <http://www.nathandavison.com/article/17/using-qunit-and-requirejs-to-build-modular-unit-tests>
+      -->
+    <link rel="stylesheet" href="lib/qunit-1.19.0.css">
+  </head>
+  <body>
+    <div id="qunit"></div>
+    <div id="qunit-fixture"></div>
+
+    <script src="require.js"></script>
+    <script>require(["test/loader"]);</script>
+  </body>
+</html>
