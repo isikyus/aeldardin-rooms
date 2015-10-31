@@ -1,7 +1,6 @@
 define([
     'symbols/base',
-    'symbols/dnd',
-    'symbols/architecture'
+    'symbols/dnd'
   ],
 function(baseScaled, dndScaled, architectureScaled) {
 
@@ -15,7 +14,6 @@ function(baseScaled, dndScaled, architectureScaled) {
     options.halfThickness = options.doorThickness / 2;
 
     var dnd = dndScaled(options);
-    var architecture = architectureScaled(options);
 
     symbols = {
       door        : dnd.door,
