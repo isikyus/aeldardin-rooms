@@ -7,9 +7,6 @@ define([
 ],
 function(QUnit, MapModel) {
   var run = function() {
-    test('hello world', function(assert) {
-      assert.equal(1, 1, 'It works!');
-    });
     test('storing list of rooms', function(assert) {
       var roomData = [
         { key: 'A', x: -2, y:  0, width: 1, height: 2, wall_features : [] },
