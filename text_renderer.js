@@ -64,6 +64,7 @@ function($, Handlebars) {
   var render = function(map, container) {
     var $container = $(container);
 
+    $container.empty();
     $.each(map.getRooms(), function(index, room) {
       $container.append(roomTemplate(roomInfo(map, room)));
     });

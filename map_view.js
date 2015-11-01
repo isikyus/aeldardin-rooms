@@ -8,7 +8,8 @@ function($, canvasRenderer, textRenderer) {
 
   var MapView = function(model, canvas) {
     var graphicsContext = canvas.getContext('2d');
-    var textContext = $(canvas).parent();
+    var textContext = $('<div>');
+    $(canvas).after(textContext);
 
     textRenderer.addListeners(textContext, model);
 
