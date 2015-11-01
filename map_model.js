@@ -81,15 +81,47 @@ function($) {
     setRooms : function(rooms) {
       this.rooms = rooms;
       this.addDerivedFields();
-      var map = this;
-      $.each(this.roomListeners, function(_index, listener) {
-        listener(map);
-      });
+      this.fireRoomsChanged();
+    },
+
+    /*
+     * Add a room, and return its map key.
+     */
+    addRoom : function(x, y, width, height) {
+      var room = {x: x, y: y, width: width, height: height}
+      this.rooms.push(room);
+      this.addDerivedFields();
+      this.fireRoomsChanged();
+
+      // Created by addDerivedFields()
+      return room.key;
+    },
+
+    /*
+     * Try to remove the given room from the map.
+     * On success, returns the given room; on failure, returns false.
+     */
+    removeRoom : function(room) {
+      var index = this.rooms.indexOf(room);
+
+      if (index > -1) {
+        this.rooms.splice(index, 1);
+        this.fireRoomsChanged();
+        return room;
+      } else {
+        return false;
+      }
     },
     addRoomsListener : function (listener) {
       this.roomListeners.push(listener);
     },
-    addDerivedFields : addDerivedFields
+    addDerivedFields : addDerivedFields,
+    fireRoomsChanged : function() {
+      var map = this;
+      $.each(this.roomListeners, function(_index, listener) {
+        listener(map);
+      });
+    }
   };
 
   return MapModel;
