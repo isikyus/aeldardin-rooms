@@ -8,6 +8,11 @@ function($, symbols) {
 
   var scale = 50;
 
+  var clearCanvas = function(context) {
+    canvas = context.canvas;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
   var drawRoom = function(room, context, map) {
     context.strokeRect(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
     drawKey(room, context);
@@ -99,6 +104,8 @@ function($, symbols) {
   };
 
   var render = function(map, context) {
+    clearCanvas(context);
+
     $.each(map.getRooms(), function(_index, room) {
       drawRoom(room, context, map);
 
