@@ -16,6 +16,7 @@ function($, canvasRenderer, textRenderer) {
     model.addRoomsListener(function(map) {
       canvasRenderer.render(map, graphicsContext);
       textRenderer.render(map, textContext);
+      canvasRenderer.addListeners(canvas, model);
     });
   };
 
