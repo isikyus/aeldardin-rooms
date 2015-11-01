@@ -21,11 +21,13 @@ require.config({
 require([
   'QUnit',
   'test/model',
+  'test/changes',
   'test/extendQUnit'
 ],
-function(QUnit, modelTests) {
+function(QUnit, modelTests, changeTests) {
 
   modelTests.run();
+  changeTests.run();
 
   QUnit.load();
   QUnit.start();
