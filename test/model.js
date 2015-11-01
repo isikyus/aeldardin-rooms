@@ -14,6 +14,12 @@ function(QUnit, MapModel) {
       ];
 
       var model = new MapModel();
+
+      assert.expect(2);
+      model.addRoomsListener(function(_rooms) {
+        assert.ok(true, "Fires change events.");
+      });
+
       model.setRooms(roomData);
 
       assert.equal(roomData, model.rooms);
