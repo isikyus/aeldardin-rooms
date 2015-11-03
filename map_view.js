@@ -13,11 +13,18 @@ function($, canvasRenderer, textRenderer) {
 
     textRenderer.addListeners(textContext, model);
 
-    model.addRoomsListener(function(map) {
-      canvasRenderer.render(map, graphicsContext);
-      textRenderer.render(map, textContext);
+    var render = function(model) {
+      canvasRenderer.render(model, graphicsContext);
+      textRenderer.render(model, textContext);
       canvasRenderer.addListeners(canvas, model);
+    };
+
+    model.map.addRoomsListener(function(_map) {
+      render(model);
     });
+    //model.selection.addListener(function(_map) {
+    //  render(model);
+    //});
   };
 
   return MapView;
