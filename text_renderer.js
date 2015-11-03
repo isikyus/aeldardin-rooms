@@ -43,7 +43,8 @@ function($, Handlebars) {
       '</ol>' +
       '<div class="edit-room" data-room-key="{{key}}">' +
         '<p class="select-room"><label>'+
-          '<input type="checkbox" id="select_room_{{id}}" class="js-select-checkbox"/>' +
+          '<input type="checkbox" id="select_room_{{id}}" class="js-select-checkbox"' +
+            ' {{#if selected}}checked{{/if}}/>' +
           'Select' +
         '</label></p>' +
         '<button class="js-remove-room">Remove</button>' +
@@ -52,13 +53,14 @@ function($, Handlebars) {
   var roomTemplate = Handlebars.default.compile(rawRoomTemplate);
 
 
-  var roomInfo = function(map, room) {
+  var roomInfo = function(model, room) {
     return {
       key    : room.key,
       id     : room.id,
-      exits  : map.exits(room),
+      exits  : model.map.exits(room),
       height : room.height * feetPerSquare,
-      width  : room.width * feetPerSquare
+      width  : room.width * feetPerSquare,
+      selected : model.selection.isSelected(room.id)
     }
   }
 
@@ -70,7 +72,7 @@ function($, Handlebars) {
 
     $container.empty();
     $.each(model.map.getRooms(), function(index, room) {
-      $container.append(roomTemplate(roomInfo(model.map, room)));
+      $container.append(roomTemplate(roomInfo(model, room)));
     });
   };
 
