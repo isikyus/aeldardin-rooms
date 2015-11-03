@@ -20,6 +20,18 @@ function($, hitRegions, symbols) {
     //debugExits(room, context, map);
   };
 
+  var drawSelectionBox = function(room, context) {
+    var boxOffset = scale / 20;
+    context.save();
+
+    context.strokeStyle = 'red';
+    context.lineWidth = 4;
+    context.strokeRect(room.x * scale - boxOffset, room.y * scale - boxOffset,
+                       room.width * scale + boxOffset * 2, room.height * scale + boxOffset * 2);
+
+    context.restore();
+  };
+
   var drawKey = function(room, context) {
     // Just draw in top-left corner for now.
     // TODO: think about key placement.
@@ -109,6 +121,10 @@ function($, hitRegions, symbols) {
 
     $.each(model.map.getRooms(), function(_index, room) {
       drawRoom(room, context, model.map);
+
+      if (model.selection.isSelected(room.id)) {
+        drawSelectionBox(room, context);
+      };
 
       $.each(room['wall_features'], function(_index, feature) {
         drawWallFeature(feature, context);
