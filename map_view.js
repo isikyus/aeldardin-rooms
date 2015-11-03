@@ -22,9 +22,9 @@ function($, canvasRenderer, textRenderer) {
     model.map.addRoomsListener(function(_map) {
       render(model);
     });
-    //model.selection.addListener(function(_map) {
-    //  render(model);
-    //});
+    model.selection.addListener(function(_map) {
+      render(model);
+    });
   };
 
   return MapView;
