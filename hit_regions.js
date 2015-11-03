@@ -15,20 +15,22 @@ function($) {
       $canvas.data(hitRegionsKey, []);
     }
 
-    // Actually install our event handlers.
-    $canvas.on('mousemove', function(event) {
-      console.log('in mousemove');
-      var $this = $(this)
-      var offset = $this.offset();
+    var fireEvent = function(name, event) {
+      var offset = $canvas.offset();
       var canvasX = event.pageX - offset.left;
       var canvasY = event.pageY - offset.top;
 
-      $.each($this.data(hitRegionsKey), function(_index, region) {
+      $.each($canvas.data(hitRegionsKey), function(_index, region) {
         if (region.x1 < canvasX && canvasX < region.x2 &&
             region.y1 < canvasY && canvasY < region.y2) {
-          region.fire('hover');
+          region.fire(name);
         }
       });
+    };
+
+    // Actually install our event handlers.
+    $canvas.on('click', function(event) {
+      fireEvent('click', event);
     });
 
     var Region = function(x, y, width, height) {
@@ -37,7 +39,7 @@ function($) {
       this.x2 = x + width;
       this.y2 = y + height;
       this.listeners = {
-        hover : []
+        click : [],
       };
     };
 
