@@ -122,8 +122,8 @@ function($, hitRegions, symbols) {
     regions.clear();
     $.each(model.getRooms(), function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
-      region.addListener('hover', function(event) {
-        console.log('Hovering over room ' + room.key);
+      region.addListener('click', function(event) {
+        console.log('Clicked on room ' + room.key);
       });
     });
   };
