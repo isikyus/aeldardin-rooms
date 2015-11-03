@@ -41,8 +41,12 @@ function($, Handlebars) {
           '</li>' +
         '{{/each}}' +
       '</ol>' +
-      '<div class="edit-room">' +
-        '<button class="js-remove-room" data-room-key="{{key}}">Remove</button>' +
+      '<div class="edit-room" data-room-key="{{key}}">' +
+        '<p class="select-room"><label>'+
+          '<input type="checkbox" id="select_room_{{id}}" class="js-select-checkbox"/>' +
+          'Select' +
+        '</label></p>' +
+        '<button class="js-remove-room">Remove</button>' +
       '</div>' +
     '</div>'
   var roomTemplate = Handlebars.default.compile(rawRoomTemplate);
@@ -61,12 +65,12 @@ function($, Handlebars) {
   /*
    * Renders the map as a list of text room descriptions.
    */
-  var render = function(map, container) {
+  var render = function(model, container) {
     var $container = $(container);
 
     $container.empty();
-    $.each(map.getRooms(), function(index, room) {
-      $container.append(roomTemplate(roomInfo(map, room)));
+    $.each(model.map.getRooms(), function(index, room) {
+      $container.append(roomTemplate(roomInfo(model.map, room)));
     });
   };
 
@@ -76,9 +80,10 @@ function($, Handlebars) {
    */
   var addListeners = function(container, model) {
     var $container = $(container);
+
     $container.on('click', '.js-remove-room', function(event) {
-      var key = $(this).data('room-key');
-      var matchingRooms = $.grep(model.getRooms(), function(room) {
+      var key = $(this).closest('div.edit-room').data('room-key');
+      var matchingRooms = $.grep(model.map.getRooms(), function(room) {
         return room.key === key;
       });
 
@@ -90,7 +95,29 @@ function($, Handlebars) {
           console.log(matchingRooms);
         }
 
-        model.removeRoom(matchingRooms[0]);
+        model.map.removeRoom(matchingRooms[0]);
+      };
+    });
+
+    $container.on('click', '.js-select-checkbox', function(event) {
+      var key = $(this).closest('div.edit-room').data('room-key');
+      var matchingRooms = $.grep(model.map.getRooms(), function(room) {
+        return room.key === key;
+      });
+
+      if (matchingRooms.length === 0) {
+        console.log('No rooms found matching key: ' + key);
+      } else {
+        if (matchingRooms.length > 1) {
+          console.log('Found several rooms for ' + key + '; selecting/deselecting only the first:');
+          console.log(matchingRooms);
+        }
+
+        if ($(this).is(':checked')) {
+          model.selection.select(matchingRooms[0].id);
+        } else {
+          model.selection.deselect(matchingRooms[0].id);
+        }
       };
     });
   };

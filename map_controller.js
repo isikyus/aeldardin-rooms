@@ -1,13 +1,17 @@
 define([
     'jquery',
     'map_model',
+    'selection_model',
     'map_view'
   ],
-function($, MapModel, MapView) {
+function($, MapModel, SelectionModel, MapView) {
   // MVC implementation based on example at <https://alexatnet.com/articles/model-view-controller-mvc-javascript>
 
   var MapController = function(canvas) {
-    this.model = new MapModel([]);
+    this.model = {
+      map: new MapModel([]),
+      selection : new SelectionModel()
+    };
     this.view = new MapView(this.model, canvas);
   };
 
@@ -22,7 +26,7 @@ function($, MapModel, MapView) {
       });
     },
     useData : function(mapData) {
-      this.model.setRooms(mapData);
+      this.model.map.setRooms(mapData);
     }
   };
 

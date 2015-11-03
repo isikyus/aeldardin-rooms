@@ -104,11 +104,11 @@ function($, hitRegions, symbols) {
     render(context);
   };
 
-  var render = function(map, context) {
-    clearCanvas(context);
+  var render = function(model, context) {
+    clearCanvas(context)
 
-    $.each(map.getRooms(), function(_index, room) {
-      drawRoom(room, context, map);
+    $.each(model.map.getRooms(), function(_index, room) {
+      drawRoom(room, context, model.map);
 
       $.each(room['wall_features'], function(_index, feature) {
         drawWallFeature(feature, context);
@@ -120,7 +120,7 @@ function($, hitRegions, symbols) {
     var regions = hitRegions(canvas);
 
     regions.clear();
-    $.each(model.getRooms(), function(_index, room) {
+    $.each(model.map.getRooms(), function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
       region.addListener('click', function(event) {
         console.log('Clicked on room ' + room.key);
