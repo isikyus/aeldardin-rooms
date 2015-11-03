@@ -22,12 +22,14 @@ require([
   'QUnit',
   'test/model',
   'test/changes',
+  'test/selection_model',
   'test/extendQUnit'
 ],
-function(QUnit, modelTests, changeTests) {
+function(QUnit, modelTests, changeTests, selectionTests) {
 
   modelTests.run();
   changeTests.run();
+  selectionTests.run();
 
   QUnit.load();
   QUnit.start();
