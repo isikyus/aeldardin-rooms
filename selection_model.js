@@ -35,7 +35,6 @@ function($) {
       this.listeners.push(listener);
     },
     fireRoomsChanged : function() {
-      console.log(this.store)
       var self = this;
       $.each(this.listeners, function(_index, listener) {
         listener(self);

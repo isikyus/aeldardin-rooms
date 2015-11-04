@@ -28,11 +28,6 @@ function($) {
       });
     };
 
-    // Actually install our event handlers.
-    $canvas.on('click', function(event) {
-      fireEvent('click', event);
-    });
-
     var Region = function(x, y, width, height) {
       this.x1 = x;
       this.y1 = y;
@@ -75,16 +70,21 @@ function($) {
     };
 
     /*
-     * Remove all hit regions and listeners from the canvas.
+     * Remove all hit regions, and re-create listeners.
+     * TODO: consider ways to only install the listener once.
      */
-    var clear = function() {
+    var reset = function() {
       $canvas.data(hitRegionsKey, []);
-      $canvas.off('hitRegion.mousemove');
+      $canvas.off('click');
+
+      $canvas.on('click', function(event) {
+        fireEvent('click', event);
+      });
     };
 
     return {
       add : add,
-      clear : clear
+      reset : reset
     };
   };
 
