@@ -16,7 +16,7 @@ function($, canvasRenderer, textRenderer) {
     var render = function(model) {
       canvasRenderer.render(model, graphicsContext);
       textRenderer.render(model, textContext);
-      canvasRenderer.addListeners(canvas, model);
+      canvasRenderer.addListeners(canvas, model, textContext);
     };
 
     model.map.addRoomsListener(function(_map) {

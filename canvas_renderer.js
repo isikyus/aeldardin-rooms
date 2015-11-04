@@ -132,14 +132,25 @@ function($, hitRegions, symbols) {
     });
   };
 
-  var addListeners = function(canvas, model) {
+  /*
+   * Set up listeners to make the canvas interactive.
+   * The third argument is the text view to pass events to;
+   * all events have to go through the text UI so things still work without canvas enabled.
+   */
+  var addListeners = function(canvas, model, textContext) {
     var regions = hitRegions(canvas);
 
-    regions.clear();
+    regions.reset();
     $.each(model.map.getRooms(), function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
       region.addListener('click', function(event) {
-        console.log('Clicked on room ' + room.key);
+        var checkbox = $(textContext).find('#select_room_' + room.id);
+        checkbox.click();
+
+        if (checkbox.length != 1) {
+          console.warn('Failed to find exactly one selection checkbox for Room #' + room.id + '; found this:');
+          console.warn(checkbox);
+        }
       });
     });
   };
