@@ -10,7 +10,7 @@ function($, hitRegions, symbols) {
   var scale = 50;
 
   var clearCanvas = function(context) {
-    canvas = context.canvas;
+    var canvas = context.canvas;
     context.clearRect(0, 0, canvas.width, canvas.height);
   }
 
