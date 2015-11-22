@@ -27,7 +27,7 @@ function(QUnit, MapController) {
         mapDiv.find('#select_room_2').click();
       };
       var deleteRooms = function() {
-        mapDiv.find('#delete_button').click();
+        mapDiv.find('#delete_selection').click();
       }
       selectRooms();
       deleteRooms();
