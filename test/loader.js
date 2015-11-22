@@ -23,13 +23,15 @@ require([
   'test/model',
   'test/changes',
   'test/selection_model',
+  'test/html_ui',
   'test/extendQUnit'
 ],
-function(QUnit, modelTests, changeTests, selectionTests) {
+function(QUnit, modelTests, changeTests, selectionTests, htmlUiTests) {
 
   modelTests.run();
   changeTests.run();
   selectionTests.run();
+  htmlUiTests.run();
 
   QUnit.load();
   QUnit.start();
