@@ -133,6 +133,16 @@ function($, hitRegions, symbols) {
   };
 
   /*
+   * Draw an intermediate state of a partly-finished action.
+   * (e.g. a room being created).
+   * render() should be called first to get rid of any existing partial state.
+   */
+  var renderInteraction = function(action, state, context) {
+
+    // TODO: implement.
+  };
+
+  /*
    * Set up listeners to make the canvas interactive.
    * The third argument is the text view to pass events to;
    * all events have to go through the text UI so things still work without canvas enabled.
@@ -157,6 +167,7 @@ function($, hitRegions, symbols) {
 
   return {
     render : render,
+    renderInteraction : renderInteraction,
     addListeners : addListeners
   };
 });

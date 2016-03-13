@@ -24,7 +24,7 @@ function($, Handlebars) {
 
   var rawRoomTemplate = "" +
     '<div class="room">' +
-      '<h3><a id="room_{{id}}">Room {{key}}</id></h3>' +
+      '<h3><a id="room_{{key}}">Room {{key}}</id></h3>' +
       '<p>' +
         'A bare room. ' +
         'It measures {{height}} feet north-to-south, ' +
@@ -37,13 +37,13 @@ function($, Handlebars) {
         '{{#each exits}}' +
           '<li>' +
             'A {{displayDoorType door.style}} in the {{door.direction}} wall, ' +
-            'leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.' +
+            'leading to <a href="#room_{{room.key}}">Room {{room.key}}</a>.' +
           '</li>' +
         '{{/each}}' +
       '</ol>' +
       '<div class="edit-room" data-room-key="{{key}}">' +
         '<p class="select-room"><label>'+
-          '<input type="checkbox" id="select_room_{{id}}" class="js-select-checkbox"' +
+          '<input type="checkbox" id="select_room_{{key}}" class="js-select-checkbox"' +
             ' {{#if selected}}checked{{/if}}/>' +
           'Select' +
         '</label></p>' +
@@ -51,6 +51,30 @@ function($, Handlebars) {
       '</div>' +
     '</div>'
   var roomTemplate = Handlebars.default.compile(rawRoomTemplate);
+
+  var rawCreateTemplate = '' +
+    '<div class="edit-room" id="js-edit-room">' +
+      '<h3>New Room</h3>' +
+      '<p>' +
+        '<label for="new-room-x">X (east-west) position of north-west corner</label>' +
+        '<input type="number" id="new-room-x"/>' +
+      '</p>' +
+      '<p>' +
+        '<label for="new-room-y">Y (north-south) position of north-west corner</label>' +
+        '<input type="number" id="new-room-y"/>' +
+      '</p>' +
+      '<p>' +
+        '<label for="new-room-width">East-West size</label>' +
+        '<input type="number" id="new-room-width"/>' +
+      '</p>' +
+      '<p>' +
+        '<label for="new-room-height">North-South size</label>' +
+        '<input type="number" id="new-room-height"/>' +
+      '</p>' +
+      '<p>' +
+        '<button id="submit-add-room">Add Room</button>' +
+    '</div>'
+  //var createTemplate = Handlebars.default.compile(rawCreateTemplate);
 
 
   var roomInfo = function(model, room) {
@@ -74,6 +98,36 @@ function($, Handlebars) {
     $.each(model.map.getRooms(), function(index, room) {
       $container.append(roomTemplate(roomInfo(model, room)));
     });
+  };
+
+  /*
+   * Renders a form for editing the intermediate state of an action.
+   */
+  var renderInteraction = function(action, state, container) {
+    var $container = $(container);
+
+    if (action == 'add_room') {
+      // We are creating a room.
+
+      // Use the existing edit form, if present; otherwise, add it.
+      var editRoomForm = $container.find('#js-edit-room');
+      if (editRoomForm.length == 0) {
+        editRoomForm = $(rawCreateTemplate);
+        editRoomForm.x
+      };
+
+      // Set X, Y, Width, and Height based on the action state.
+      editRoomForm.find('#new-room-x').val(state.x);
+      editRoomForm.find('#new-room-y').val(state.y);
+      editRoomForm.find('#new-room-width').val(state.width);
+      editRoomForm.find('#new-room-height').val(state.height);
+
+      // Make sure the form is visible.
+      $container.prepend(editRoomForm);
+
+    } else {
+      console.warn('unexpected action ' + action);
+    };
   };
 
   /*
@@ -122,10 +176,37 @@ function($, Handlebars) {
         }
       };
     });
+
+    // Fire update events as the edit form contents change.
+    $container.on('change', '#js-edit-room input', function(_event) {
+
+      if (model.action.action === 'add_room') {
+
+        var $editRoomForm = $('#js-edit-room');
+        var roomProperties = {
+          x : $editRoomForm.find('#new-room-x').val(),
+          y : $editRoomForm.find('#new-room-y').val(),
+          width : $editRoomForm.find('#new-room-width').val(),
+          height : $editRoomForm.find('#new-room-height').val()
+        };
+        model.action.update(roomProperties);
+      } else {
+        console.warn('Tried to finish adding room when not in that state');
+      };
+    });
+
+    $container.on('click', '#submit-add-room', function(_event) {
+      if (model.action.action === 'add_room') {
+        model.action.finish('add_room');
+      } else {
+        console.warn('Tried to finish adding room when not in that state');
+      };
+    });
   };
 
   return {
     render : render,
+    renderInteraction : renderInteraction,
     addListeners : addListeners
   };
 });

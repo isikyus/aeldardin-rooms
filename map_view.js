@@ -11,6 +11,7 @@ function($, canvasRenderer, textRenderer) {
   var buildToolbar = function() {
     var toolbarHtml = '<div id="toolbar">' +
         '<button id="delete_selection">Delete</button>' +
+        '<button id="add_room">Add Room</button>' +
       '</div>';
     return $(toolbarHtml);
   };
@@ -31,6 +32,11 @@ function($, canvasRenderer, textRenderer) {
         }
       });
       $.each(toDelete, function(_index, room) { model.map.removeRoom(room); });
+    });
+
+    $toolbar.find('#add_room').on('click', function() {
+
+      model.action.start('add_room', { x : 0, y : 0, width: 1, height: 1 });
     });
   };
 
@@ -57,6 +63,20 @@ function($, canvasRenderer, textRenderer) {
     });
     model.selection.addListener(function(_map) {
       render(model);
+    });
+    model.action.addListener(function(event, action, state) {
+
+      // Re-draw the model to erase any existing partial state.
+      render(model);
+
+      if (event === 'start' || event === 'update') {
+        canvasRenderer.renderInteraction(action, state, graphicsContext);
+        textRenderer.renderInteraction(action, state, textContext);
+
+      } else if (event !== 'finish' && event !== 'cancel') {
+        console.warn('Unexpected event type (not start, update, finish, or cancel):');
+        console.warn([event, action, state]);
+      };
     });
   };
 
