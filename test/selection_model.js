@@ -1,4 +1,4 @@
-// Tests for the map model.
+// Tests for the selection model.
 
 "use strict";
 define([
@@ -7,6 +7,8 @@ define([
 ],
 function(QUnit, SelectionModel) {
   var run = function() {
+    QUnit.module('Selection');
+
     test('selecting a room', function(assert) {
       var initial = 'initial selection';
       var model = new SelectionModel();
