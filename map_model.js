@@ -88,7 +88,7 @@ function($) {
      * Add a room, and return its map key.
      */
     addRoom : function(x, y, width, height) {
-      var room = {x: x, y: y, width: width, height: height}
+      var room = {x: x, y: y, width: width, height: height, wall_features: []}
       this.rooms.push(room);
       this.addDerivedFields();
       this.fireRoomsChanged();
