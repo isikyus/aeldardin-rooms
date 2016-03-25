@@ -1,6 +1,6 @@
 /*
   * Hand-rolled hit-region implementation, as the version in the Canvas spec isn't supported yet.
-  * Currently only supports square regions.
+  * Currently only supports rectangular regions.
   */
 
 define([
@@ -19,6 +19,15 @@ function($) {
       var offset = $canvas.offset();
       var canvasX = event.pageX - offset.left;
       var canvasY = event.pageY - offset.top;
+
+      _fire(name, canvasX, canvasY);
+    };
+
+    /**
+     * Fire an event as though it occurred at the specified point on the canvas.
+     * Exposed as its own method for testing.
+     */
+    var _fire = function(name, canvasX, canvasY) {
 
       $.each($canvas.data(hitRegionsKey), function(_index, region) {
         if (region.x1 < canvasX && canvasX < region.x2 &&
@@ -41,8 +50,8 @@ function($) {
     /*
      * Add an event listener to the hit region.
      *
-     * Currently, the only supported event name is 'hover',
-     * which fires when the mouse moves into the region.
+     * Currently, the only supported event name is 'click',
+     * which fires when the user clicks on the region.
      *
      * Listeners will be passed the jQuert event that triggered them.
      */
@@ -84,7 +93,9 @@ function($) {
 
     return {
       add : add,
-      reset : reset
+      reset : reset,
+
+      _fire: _fire
     };
   };
 
