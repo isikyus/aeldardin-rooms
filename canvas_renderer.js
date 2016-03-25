@@ -7,6 +7,7 @@ define([
   ],
 function($, hitRegions, symbols) {
 
+  // TODO: extract so tests can use it.
   var scale = 50;
 
   var clearCanvas = function(context) {
