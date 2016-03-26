@@ -46,7 +46,8 @@ function($) {
     var rooms = this.rooms;
 
     $.each(rooms, function(index, room) {
-      room.key = parseInt(index) + 1;
+      room.id = parseInt(index);
+      room.key = room.id + 1;
     });
   };
 
@@ -85,7 +86,7 @@ function($) {
     },
 
     /*
-     * Add a room, and return its map key.
+     * Add a room, and return its ID.
      */
     addRoom : function(x, y, width, height) {
       var room = {x: x, y: y, width: width, height: height, wall_features: []}
@@ -94,7 +95,7 @@ function($) {
       this.fireRoomsChanged();
 
       // Created by addDerivedFields()
-      return room.key;
+      return room.id;
     },
 
     /*
