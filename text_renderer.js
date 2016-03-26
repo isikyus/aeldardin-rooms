@@ -24,7 +24,7 @@ function($, Handlebars) {
 
   var rawRoomTemplate = "" +
     '<div class="room">' +
-      '<h3><a id="room_{{key}}">Room {{key}}</id></h3>' +
+      '<h3><a id="room_{{id}}">Room {{key}}</id></h3>' +
       '<p>' +
         'A bare room. ' +
         'It measures {{height}} feet north-to-south, ' +
@@ -37,13 +37,13 @@ function($, Handlebars) {
         '{{#each exits}}' +
           '<li>' +
             'A {{displayDoorType door.style}} in the {{door.direction}} wall, ' +
-            'leading to <a href="#room_{{room.key}}">Room {{room.key}}</a>.' +
+            'leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.' +
           '</li>' +
         '{{/each}}' +
       '</ol>' +
       '<div class="edit-room" data-room-key="{{key}}">' +
         '<p class="select-room"><label>'+
-          '<input type="checkbox" id="select_room_{{key}}" class="js-select-checkbox"' +
+          '<input type="checkbox" id="select_room_{{id}}" class="js-select-checkbox"' +
             ' {{#if selected}}checked{{/if}}/>' +
           'Select' +
         '</label></p>' +

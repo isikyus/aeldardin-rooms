@@ -34,8 +34,8 @@ function(QUnit, MapController, hitRegions) {
         // 1.5, 1.5 is within Room 0.
         regions._fire('click', 1.5 * scale, 1.5 * scale);
 
-        // 2, 2.5 is within Room 2.
-        regions._fire('click', 2 * scale, 2.5 * scale);
+        // 3.5, 2 is within Room 2.
+        regions._fire('click', 3.5 * scale, 2 * scale);
       };
       var deleteRooms = function() {
         mapDiv.find('#delete_selection').click();
