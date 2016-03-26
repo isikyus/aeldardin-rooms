@@ -19,17 +19,17 @@ function(QUnit, MapModel) {
         assert.ok(true, 'Fires change events');
       });
 
-      var key = model.addRoom(10, 5, 4, 2);
-      assert.strictEqual(key, 1, 'Returns room key on success');
+      var id = model.addRoom(10, 5, 4, 2);
+      assert.strictEqual(id, 0, 'Returns room id on success');
 
-      assert.deepEqual(model.getRooms(), [{x: 10, y: 5, width: 4, height: 2, key: key, wall_features: []}]);
+      assert.deepEqual(model.getRooms(), [{x: 10, y: 5, width: 4, height: 2, id: id, key: id + 1, wall_features: []}]);
     });
 
     test("removing a room", function(assert) {
       var model = new MapModel();
       model.setRooms([
-        {key: 1, x: 10, y: 5, width: 4, height: 2},
-        {key: 2, x: 10, y: 7, width: 2, height: 3}
+        {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2},
+        {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3}
       ]);
 
       assert.expect(3);
@@ -38,16 +38,16 @@ function(QUnit, MapModel) {
       });
 
       var result = model.removeRoom(model.getRooms()[1]);
-      assert.deepEqual(result, {key: 2, x: 10, y: 7, width: 2, height: 3}, 'Returns removed room on success');
+      assert.deepEqual(result, {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3}, 'Returns removed room on success');
 
       assert.deepEqual(model.getRooms(), [
-        {key: 1, x: 10, y: 5, width: 4, height: 2}
+        {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2}
       ]);
     });
 
     test("removing a room that doesn't exist", function(assert) {
       var model = new MapModel();
-      model.setRooms([{key: 1, x: 10, y: 5, width: 4, height: 2}]);
+      model.setRooms([{id: 0, key: 1, x: 10, y: 5, width: 4, height: 2}]);
 
       assert.expect(2);
       model.addRoomsListener(function(_rooms) {
@@ -58,7 +58,7 @@ function(QUnit, MapModel) {
       var result = model.removeRoom({key: 1, x: 10, y: 5, width: 4, height: 2});
       assert.notOk(result, 'Returns false on failure');
 
-      assert.deepEqual(model.getRooms(), [{key: 1, x: 10, y: 5, width: 4, height: 2}]);
+      assert.deepEqual(model.getRooms(), [{id: 0, key: 1, x: 10, y: 5, width: 4, height: 2}]);
     });
   };
   return { run : run }
