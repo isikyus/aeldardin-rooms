@@ -145,22 +145,21 @@ function($, hitRegions, symbols) {
 
   /*
    * Set up listeners to make the canvas interactive.
-   * The third argument is the text view to pass events to;
-   * all events have to go through the text UI so things still work without canvas enabled.
    */
-  var addListeners = function(canvas, model, textContext) {
+  var addListeners = function(canvas, model) {
     var regions = hitRegions(canvas);
 
     regions.reset();
     $.each(model.map.getRooms(), function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
-      region.addListener('click', function(event) {
-        var checkbox = $(textContext).find('#select_room_' + room.id);
-        checkbox.click();
 
-        if (checkbox.length != 1) {
-          console.warn('Failed to find exactly one selection checkbox for Room #' + room.id + '; found this:');
-          console.warn(checkbox);
+      region.addListener('click', function(event) {
+        var selection = model.selection;
+
+        if (selection.isSelected(room.id)) {
+          selection.deselect(room.id);
+        } else {
+          selection.select(room.id);
         }
       });
     });
