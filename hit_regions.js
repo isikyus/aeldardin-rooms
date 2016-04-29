@@ -59,7 +59,13 @@ function($) {
     var hitRegionsKey = 'mapView.hitRegions';
     var $canvas = $(canvas);
     if ($canvas.data(hitRegionsKey) === undefined) {
-      $canvas.data(hitRegionsKey, []);
+      $canvas.data(hitRegionsKey, {
+        regions: [],
+
+        // Set region coordinates to be blank, as we only really need the event handling.
+        // TODO: extracted a separate type for things that just dispatch events.
+        fallbackRegion: new Region(-1, -1, -1, -1)
+      });
     }
 
     var fireEvent = function(name, event) {
@@ -76,12 +82,21 @@ function($) {
      */
     var _fire = function(name, canvasX, canvasY) {
 
-      $.each($canvas.data(hitRegionsKey), function(_index, region) {
+      var regionData = $canvas.data(hitRegionsKey);
+      var hit = false;
+
+      $.each(regionData.regions, function(_index, region) {
         if (region.x1 < canvasX && canvasX < region.x2 &&
             region.y1 < canvasY && canvasY < region.y2) {
           region.fire(name);
+          hit = true;
         }
       });
+
+      // Fire an event on the fallback region if nothing was clicked.
+      if (!hit) {
+        regionData.fallbackRegion.fire(name, event);
+      };
     };
 
     /*
@@ -90,8 +105,18 @@ function($) {
      */
     var add = function(x, y, width, height) {
       var region = new Region(x, y, width, height);
-      $canvas.data(hitRegionsKey).push(region);
+      $canvas.data(hitRegionsKey).regions.push(region);
       return region;
+    };
+
+    /*
+     * Return a reference to the "fallback" hit region,
+     * which is notified of events no other region handles
+     * (i.e. clicks on something not in any region).
+     * TODO: use JS's properties support for this.
+     */
+    var getFallback = function() {
+      return  $canvas.data(hitRegionsKey).fallbackRegion;
     };
 
     /*
@@ -99,7 +124,14 @@ function($) {
      * TODO: consider ways to only install the listener once.
      */
     var reset = function() {
-      $canvas.data(hitRegionsKey, []);
+      // TODO: duplicated from the initialisation code.
+      $canvas.data(hitRegionsKey, {
+        regions: [],
+
+        // Set region coordinates to be blank, as we only really need the event handling.
+        // TODO: extracted a separate type for things that just dispatch events.
+        fallbackRegion: new Region(-1, -1, -1, -1)
+      });
 
       $.each(SUPPORTED_EVENTS, function(_index, eventName) {
         $canvas.off(eventName);
@@ -112,6 +144,7 @@ function($) {
     return {
       add : add,
       reset : reset,
+      getFallback : getFallback,
 
       _fire: _fire
     };
