@@ -59,14 +59,14 @@ function(QUnit, MapController, hitRegions) {
 
       // Create a room with exact coordinates.
       var createExactRoom = function() {
-        regions._fire('dragstart', 1 * scale, 1 * scale);
-        regions._fire('drop', 2 * scale, 4 * scale);
+        regions._fire('mousedown', 1 * scale, 1 * scale);
+        regions._fire('mouseup', 2 * scale, 4 * scale);
       };
 
       // Create a room with inexact coordinates, to test rounding
       var createInexactRoom = function() {
-        regions._fire('dragstart', 2.1 * scale, 0.9 * scale);
-        regions._fire('drop', 2.7 * scale, 3.4 * scale);
+        regions._fire('mousedown', 2.1 * scale, 0.9 * scale);
+        regions._fire('mouseup', 2.7 * scale, 3.4 * scale);
       };
 
       createExactRoom();
@@ -92,10 +92,10 @@ function(QUnit, MapController, hitRegions) {
       var action = controller.model.action;
 
       // Start creating a room, and check initial state.
-      regions._fire('dragstart', 1 * scale, 1 * scale);
+      regions._fire('mousedown', 1 * scale, 1 * scale);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 0});
 
-      regions.fire('dragexit', 0, 0);
+      regions.fire('mouseleave', 0, 0);
       assert.equal(action.actionData, null);
 
       assert.equal(model.map.getRooms(), []);
@@ -110,16 +110,16 @@ function(QUnit, MapController, hitRegions) {
       var action = controller.model.action;
 
       // Start creating a room, and check initial state.
-      regions._fire('dragstart', 1 * scale, 1 * scale);
+      regions._fire('mousedown', 1 * scale, 1 * scale);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 0});
 
-      regions.fire('drag', 4, 3);
+      regions.fire('mousemove', 4, 3);
       assert.equal(action.actionData, { x: 1, y : 1, width: 3, height: 2});
 
-      regions.fire('drag', 1, 3);
+      regions.fire('mousemove', 1, 3);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 2});
 
-      regions.fire('drop');
+      regions.fire('mousemove');
       assert.equal(action.actionData, null);
 
       assert.equal(model.map.getRooms(), []);
