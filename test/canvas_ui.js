@@ -57,6 +57,7 @@ function(QUnit, MapController, hitRegions) {
       // TODO: make this part of common setup code.
       var regions = hitRegions(mapDiv.find('canvas'));
 
+      // TODO: extract these to separate tests.
       // Create a room with exact coordinates.
       var createExactRoom = function() {
         regions._fire('mousedown', 1 * scale, 1 * scale);
@@ -69,18 +70,31 @@ function(QUnit, MapController, hitRegions) {
         regions._fire('mouseup', 2.7 * scale, 3.4 * scale);
       };
 
+      // Create a room by moving the mouse left and up (should reverse origin and final corners).
+      var createRoomMovingLeftAndUp = function() {
+        regions._fire('mousedown', 3 * scale, 4 * scale);
+        regions._fire('mouseup', 2 * scale, 3 * scale);
+      };
+
       createExactRoom();
       createInexactRoom();
+      createRoomMovingLeftAndUp();
 
       var rooms = controller.model.map.getRooms();
       assert.equal(rooms[0].x, 1);
       assert.equal(rooms[0].y, 1);
       assert.equal(rooms[0].width, 1);
       assert.equal(rooms[0].height, 3);
+
       assert.equal(rooms[1].x, 2);
       assert.equal(rooms[1].y, 1);
-      assert.equal(rooms[0].width, 1);
-      assert.equal(rooms[0].height, 2);
+      assert.equal(rooms[1].width, 1);
+      assert.equal(rooms[1].height, 2);
+
+      assert.equal(rooms[2].x, 3);
+      assert.equal(rooms[2].y, 2);
+      assert.equal(rooms[2].width, 1);
+      assert.equal(rooms[2].height, 1);
     });
 
     test('cancelling a room by moving out of the map', function(assert) {
@@ -95,7 +109,7 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mousedown', 1 * scale, 1 * scale);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 0});
 
-      regions.fire('mouseleave', 0, 0);
+      regions._fire('mouseleave', 0, 0);
       assert.equal(action.actionData, null);
 
       assert.equal(model.map.getRooms(), []);
@@ -113,16 +127,16 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mousedown', 1 * scale, 1 * scale);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 0});
 
-      regions.fire('mousemove', 4, 3);
+      regions._fire('mousemove', 4, 3);
       assert.equal(action.actionData, { x: 1, y : 1, width: 3, height: 2});
 
-      regions.fire('mousemove', 1, 3);
+      regions._fire('mousemove', 1, 3);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 2});
 
-      regions.fire('mousemove');
+      regions._fire('mousemove');
       assert.equal(action.actionData, null);
 
-      assert.equal(model.map.getRooms(), []);
+      assert.equal(controller.model.map.getRooms(), []);
     });
   };
   return { run : run }
