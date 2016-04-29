@@ -33,11 +33,11 @@ function($) {
 
       /*
        * Add an event listener to the hit region.
+       * See SUPPORTED_EVENTS for available event names.
        *
-       * Currently, the only supported event name is 'click',
-       * which fires when the user clicks on the region.
-       *
-       * Listeners will be passed the jQuery event that triggered them.
+       * Listeners will be passed a synthetic event object.
+       * Currently, its only properties are x and y, which are relative to the _canvas_
+       * (not to the document, as the underlying JQuery event's coordinates are).
        */
       Region.prototype.addListener = function(eventName, listener) {
         this.listeners[eventName].push(listener);
@@ -88,14 +88,14 @@ function($) {
       $.each(regionData.regions, function(_index, region) {
         if (region.x1 < canvasX && canvasX < region.x2 &&
             region.y1 < canvasY && canvasY < region.y2) {
-          region.fire(name);
+          region.fire(name, {x: canvasX, y: canvasY});
           hit = true;
         }
       });
 
       // Fire an event on the fallback region if nothing was clicked.
       if (!hit) {
-        regionData.fallbackRegion.fire(name, event);
+        regionData.fallbackRegion.fire(name, {x: canvasX, y: canvasY});
       };
     };
 

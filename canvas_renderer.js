@@ -165,7 +165,12 @@ function($, hitRegions, symbols) {
     });
 
     regions.getFallback().addListener('mousedown', function(event) {
-      console.log('mousedown in fallback regions');
+      model.action.start('add_room', {
+        x : event.x / scale,
+        y : event.y / scale,
+        width: 0,
+        height: 0
+      });
     });
   };
 
