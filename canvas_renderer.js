@@ -163,6 +163,10 @@ function($, hitRegions, symbols) {
         }
       });
     });
+
+    regions.getFallback().addListener('mousedown', function(event) {
+      console.log('mousedown in fallback regions');
+    });
   };
 
   return {
