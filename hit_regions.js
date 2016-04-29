@@ -79,15 +79,22 @@ function($) {
     };
 
     /*
+     * The mouse events hit regions are sensitive to.
+     */
+    var SUPPORTED_EVENTS = ['click', 'dragstart'];
+
+    /*
      * Remove all hit regions, and re-create listeners.
      * TODO: consider ways to only install the listener once.
      */
     var reset = function() {
       $canvas.data(hitRegionsKey, []);
-      $canvas.off('click');
 
-      $canvas.on('click', function(event) {
-        fireEvent('click', event);
+      $.each(SUPPORTED_EVENTS, function(_index, eventName) {
+        $canvas.off(eventName);
+        $canvas.on(eventName, function(event) {
+          fireEvent(eventName, event);
+        });
       });
     };
 
