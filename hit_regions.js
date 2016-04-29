@@ -9,6 +9,53 @@ define([
 function($) {
 
   var hitRegions = function(canvas) {
+
+    /*
+     * The mouse events hit regions are sensitive to.
+     */
+    var SUPPORTED_EVENTS = ['click', 'mousedown'];
+
+    // Define a type for hit regions.
+    var Region = (function() {
+
+      var Region = function(x, y, width, height) {
+        this.x1 = x;
+        this.y1 = y;
+        this.x2 = x + width;
+        this.y2 = y + height;
+
+        var listeners = {}
+        $.each(SUPPORTED_EVENTS, function(_index, event) {
+          listeners[event] = [];
+        });
+        this.listeners = listeners;
+      };
+
+      /*
+       * Add an event listener to the hit region.
+       *
+       * Currently, the only supported event name is 'click',
+       * which fires when the user clicks on the region.
+       *
+       * Listeners will be passed the jQuery event that triggered them.
+       */
+      Region.prototype.addListener = function(eventName, listener) {
+        this.listeners[eventName].push(listener);
+      };
+
+      /*
+       * Fire an event with the given name.
+       */
+      Region.prototype.fire = function(eventName, event) {
+        $.each(this.listeners[eventName], function(_index, listener) {
+          listener(event);
+        });
+      };
+
+      return Region;
+    })();
+
+
     var hitRegionsKey = 'mapView.hitRegions';
     var $canvas = $(canvas);
     if ($canvas.data(hitRegionsKey) === undefined) {
@@ -37,37 +84,6 @@ function($) {
       });
     };
 
-    var Region = function(x, y, width, height) {
-      this.x1 = x;
-      this.y1 = y;
-      this.x2 = x + width;
-      this.y2 = y + height;
-      this.listeners = {
-        click : [],
-      };
-    };
-
-    /*
-     * Add an event listener to the hit region.
-     *
-     * Currently, the only supported event name is 'click',
-     * which fires when the user clicks on the region.
-     *
-     * Listeners will be passed the jQuert event that triggered them.
-     */
-    Region.prototype.addListener = function(eventName, listener) {
-      this.listeners[eventName].push(listener);
-    };
-
-    /*
-     * Fire an event with the given name.
-     */
-    Region.prototype.fire = function(eventName, event) {
-      $.each(this.listeners[eventName], function(_index, listener) {
-        listener(event);
-      });
-    };
-
     /*
      * Add a hit region with the specified dimensions.
      * Returns an object representing that region.
@@ -77,11 +93,6 @@ function($) {
       $canvas.data(hitRegionsKey).push(region);
       return region;
     };
-
-    /*
-     * The mouse events hit regions are sensitive to.
-     */
-    var SUPPORTED_EVENTS = ['click', 'dragstart'];
 
     /*
      * Remove all hit regions, and re-create listeners.
