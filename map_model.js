@@ -34,7 +34,7 @@ function($) {
         throw 'Unexpected door direction' + door.direction;
     }
   };
-  
+
   var exit = function(door, toRoom) {
     return {
       door : door,
