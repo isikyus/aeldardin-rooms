@@ -22,7 +22,7 @@ function(QUnit, MapModel) {
       var id = model.addRoom(10, 5, 4, 2);
       assert.strictEqual(id, 0, 'Returns room id on success');
 
-      assert.deepEqual(model.getRooms(), [{x: 10, y: 5, width: 4, height: 2, id: id, key: id + 1, wall_features: []}]);
+      assert.deepEqual(model.getRooms(), [{x: 10, y: 5, width: 4, height: 2, id: id, key: id + 1, wallFeatures: []}]);
     });
 
     test("removing a room", function(assert) {
