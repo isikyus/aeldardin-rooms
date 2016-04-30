@@ -127,10 +127,10 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mousedown', 1 * scale, 1 * scale);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 0});
 
-      regions._fire('mousemove', 4, 3);
+      regions._fire('mousemove', 4 * scale, 3 * scale);
       assert.equal(action.actionData, { x: 1, y : 1, width: 3, height: 2});
 
-      regions._fire('mousemove', 1, 3);
+      regions._fire('mousemove', 1 * scale, 3 * scale);
       assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 2});
 
       regions._fire('mousemove');
