@@ -107,12 +107,12 @@ function(QUnit, MapController, hitRegions) {
 
       // Start creating a room, and check initial state.
       regions._fire('mousedown', 1 * scale, 1 * scale);
-      assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 0});
+      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 0, height: 0});
 
       regions._fire('mouseleave', 0, 0);
       assert.equal(action.actionData, null);
 
-      assert.equal(model.map.getRooms(), []);
+      assert.deepEqual(model.map.getRooms(), []);
     });
 
     test('cancelling a room by not making it big enough', function(assert) {
@@ -125,18 +125,18 @@ function(QUnit, MapController, hitRegions) {
 
       // Start creating a room, and check initial state.
       regions._fire('mousedown', 1 * scale, 1 * scale);
-      assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 0});
+      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 0, height: 0});
 
       regions._fire('mousemove', 4 * scale, 3 * scale);
-      assert.equal(action.actionData, { x: 1, y : 1, width: 3, height: 2});
+      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 3, height: 2});
 
       regions._fire('mousemove', 1 * scale, 3 * scale);
-      assert.equal(action.actionData, { x: 1, y : 1, width: 0, height: 2});
+      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 0, height: 2});
 
-      regions._fire('mousemove');
+      regions._fire('mouseup', 1 * scale, 3 * scale);
       assert.equal(action.actionData, null);
 
-      assert.equal(controller.model.map.getRooms(), []);
+      assert.deepEqual(controller.model.map.getRooms(), []);
     });
   };
   return { run : run }
