@@ -91,8 +91,8 @@ function(QUnit, MapController, hitRegions) {
       assert.equal(rooms[1].width, 1);
       assert.equal(rooms[1].height, 2);
 
-      assert.equal(rooms[2].x, 3);
-      assert.equal(rooms[2].y, 2);
+      assert.equal(rooms[2].x, 2);
+      assert.equal(rooms[2].y, 3);
       assert.equal(rooms[2].width, 1);
       assert.equal(rooms[2].height, 1);
     });

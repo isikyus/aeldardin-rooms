@@ -189,16 +189,16 @@ function($, hitRegions, symbols) {
      * Assumes the current action is 'add_room'
      */
     var updateAddRoomAction = function(action, newX, newY) {
-        var roomOriginX = action.actionData.x;
-        var roomOriginY = action.actionData.y;
-        var mouseX = newX / scale;
-        var mouseY = newY / scale;
+        var roomOriginX = Math.round(action.actionData.x);
+        var roomOriginY = Math.round(action.actionData.y);
+        var newCornerX = Math.round(newX / scale);
+        var newCornerY = Math.round(newY / scale);
 
         action.update({
-          x : action.actionData.x,
-          y : action.actionData.y,
-          width: mouseX - roomOriginX,
-          height: mouseY - roomOriginY
+          x : roomOriginX,
+          y : roomOriginY,
+          width: newCornerX - roomOriginX,
+          height: newCornerY - roomOriginY
         });
     }
 
