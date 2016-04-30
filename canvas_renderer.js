@@ -140,7 +140,12 @@ function($, hitRegions, symbols) {
    */
   var renderInteraction = function(action, state, context) {
 
-    // TODO: implement.
+    if (action == 'add_room') {
+      context.save();
+      context.strokeStyle = 'red';
+      context.strokeRect(state.x * scale, state.y * scale, state.width * scale, state.height * scale);
+      context.restore();
+    };
   };
 
   /*
