@@ -55,7 +55,7 @@ function($, canvasRenderer, textRenderer) {
     var render = function(model) {
       canvasRenderer.render(model, graphicsContext);
       textRenderer.render(model, textContext);
-      canvasRenderer.addListeners(canvas, model, textContext);
+      canvasRenderer.addListeners(canvas, model);
     };
 
     model.map.addRoomsListener(function(_map) {
@@ -78,6 +78,8 @@ function($, canvasRenderer, textRenderer) {
         console.warn([event, action, state]);
       };
     });
+
+    render(model);
   };
 
   return MapView;

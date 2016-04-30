@@ -164,13 +164,43 @@ function($, hitRegions, symbols) {
       });
     });
 
+    var action = model.action;
     regions.getFallback().addListener('mousedown', function(event) {
-      model.action.start('add_room', {
+      action.start('add_room', {
         x : event.x / scale,
         y : event.y / scale,
         width: 0,
         height: 0
       });
+    });
+
+    /*
+     * Update the room being added, based on the new mouse position
+     * and the old top-left corner stored in the action.
+     *
+     * Assumes the current action is 'add_room'
+     */
+    var updateAddRoomAction = function(action, newX, newY) {
+        var roomOriginX = action.actionData.x;
+        var roomOriginY = action.actionData.y;
+        var mouseX = newX / scale;
+        var mouseY = newY / scale;
+
+        action.update({
+          // Pick the top-left corner as the room origin,
+          // so width and height are never negative.
+          x : Math.min(roomOriginX, mouseX),
+          y : Math.min(roomOriginY, mouseY),
+          width: Math.abs(roomOriginX - mouseX),
+          height: Math.abs(roomOriginY - mouseY)
+        });
+    }
+
+    regions.getFallback().addListener('mousemove', function(event) {
+
+      if (action.action == 'add_room') {
+        updateAddRoomAction(action, event.x, event.y);
+      }
     });
   };
 
