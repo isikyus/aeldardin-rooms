@@ -112,7 +112,7 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mouseleave', 0, 0);
       assert.equal(action.actionData, null);
 
-      assert.deepEqual(model.map.getRooms(), []);
+      assert.deepEqual(controller.model.map.getRooms(), []);
     });
 
     test('cancelling a room by not making it big enough', function(assert) {

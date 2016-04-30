@@ -214,6 +214,12 @@ function($, hitRegions, symbols) {
         action.finish();
       }
     });
+
+    regions.getFallback().addListener('mouseleave', function(event) {
+      if (action.action == 'add_room') {
+        action.cancel();
+      }
+    });
   };
 
   return {

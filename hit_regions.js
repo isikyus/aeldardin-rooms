@@ -12,8 +12,10 @@ function($) {
 
     /*
      * The mouse events hit regions are sensitive to.
+     *
+     * TODO: MDN recommends only listening for mousemove when we actually care about it.
      */
-    var SUPPORTED_EVENTS = ['click', 'mousedown', 'mousemove', 'mouseup'];
+    var SUPPORTED_EVENTS = ['click', 'mousedown', 'mousemove', 'mouseup', 'mouseleave'];
 
     // Define a type for hit regions.
     var Region = (function() {
