@@ -180,8 +180,11 @@ function($, hitRegions, symbols) {
     });
 
     /*
-     * Update the room being added, based on the new mouse position
-     * and the old top-left corner stored in the action.
+     * Update the width and height of the room being added,
+     * based on the new mouse position
+     *
+     * Leaves the top-left corner unchanged, so the user can drag around it.
+     * This means width and height can go negative, which will have to be corrected for later.
      *
      * Assumes the current action is 'add_room'
      */
@@ -192,12 +195,10 @@ function($, hitRegions, symbols) {
         var mouseY = newY / scale;
 
         action.update({
-          // Pick the top-left corner as the room origin,
-          // so width and height are never negative.
-          x : Math.min(roomOriginX, mouseX),
-          y : Math.min(roomOriginY, mouseY),
-          width: Math.abs(roomOriginX - mouseX),
-          height: Math.abs(roomOriginY - mouseY)
+          x : action.actionData.x,
+          y : action.actionData.y,
+          width: mouseX - roomOriginX,
+          height: mouseY - roomOriginY
         });
     }
 
