@@ -26,8 +26,26 @@ function($, MapModel, SelectionModel, ActionModel, MapView) {
         // Was it adding a room (only thing we know how to hande now?)
         if (action === 'add_room') {
 
-          // Add the room to the model.
-          model.map.addRoom(data.x, data.y, data.width, data.height);
+          // Width and height may be negative.
+          // If so, convert them so x, y is the top-left corner.
+          var x = data.x, y = data.y, width = data.width, height = data.height;
+
+          // Bail out if the room would have no area.
+          if (width == 0 || height == 0) {
+            // TODO: we'd like to cancel the event, but can't, as it's already finished.
+            return;
+          };
+
+          if (width < 0) {
+            width = -width;
+            x = x - width;
+          }
+          if (height < 0) {
+            height = -height;
+            y = y - height;
+          }
+
+          model.map.addRoom(x, y, width, height);
         } else {
 
           // We don't support whatever this is -- bail out.
