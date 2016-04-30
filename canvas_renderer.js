@@ -127,7 +127,7 @@ function($, hitRegions, symbols) {
         drawSelectionBox(room, context);
       };
 
-      $.each(room['wall_features'], function(_index, feature) {
+      $.each(room['wallFeatures'], function(_index, feature) {
         drawWallFeature(feature, context);
       });
     });

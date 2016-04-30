@@ -62,14 +62,14 @@ function($) {
         if (otherRoom == room) return;
 
         // Find exits from this room to the other room.
-        $.each(room.wall_features, function(_index2, door) {
+        $.each(room.wallFeatures, function(_index2, door) {
           if (connectsTo(door, otherRoom)) {
             exits.push(exit(door, otherRoom));
           }
         });
 
         // Exits from the other room to this one.
-        $.each(otherRoom.wall_features, function(_index2, door) {
+        $.each(otherRoom.wallFeatures, function(_index2, door) {
           if (connectsTo(door, room)) {
             exits.push(exit(door, otherRoom));
           }
@@ -89,7 +89,7 @@ function($) {
      * Add a room, and return its ID.
      */
     addRoom : function(x, y, width, height) {
-      var room = {x: x, y: y, width: width, height: height, wall_features: []}
+      var room = {x: x, y: y, width: width, height: height, wallFeatures: []}
       this.rooms.push(room);
       this.addDerivedFields();
       this.fireRoomsChanged();

@@ -9,8 +9,8 @@ function(QUnit, MapModel) {
   var run = function() {
     test('storing list of rooms', function(assert) {
       var roomData = [
-        { key: 'A', x: -2, y:  0, width: 1, height: 2, wall_features : [] },
-        { key: 'B', x:  2, y: -2, width: 4, height: 1, wall_features : [] }
+        { key: 'A', x: -2, y:  0, width: 1, height: 2, wallFeatures : [] },
+        { key: 'B', x:  2, y: -2, width: 4, height: 1, wallFeatures : [] }
       ];
 
       var model = new MapModel();
@@ -29,8 +29,8 @@ function(QUnit, MapModel) {
     test('south', function(assert) {
 
       var door = { direction: 'south', x: 0, y: 1 };
-      var north = { x: 0, y: 0, width: 2, height: 2, wall_features : [door] };
-      var south = { x: 0, y: 2, width: 2, height: 2, wall_features : [] };
+      var north = { x: 0, y: 0, width: 2, height: 2, wallFeatures : [door] };
+      var south = { x: 0, y: 2, width: 2, height: 2, wallFeatures : [] };
       var roomData = [];
 
       var model = new MapModel();
@@ -42,8 +42,8 @@ function(QUnit, MapModel) {
     test('north', function(assert) {
 
       var door = { direction: 'north', x: 1, y: 2 };
-      var north = { x: 0, y: 0, width: 2, height: 2, wall_features : [] };
-      var south = { x: 0, y: 2, width: 2, height: 2, wall_features : [door] };
+      var north = { x: 0, y: 0, width: 2, height: 2, wallFeatures : [] };
+      var south = { x: 0, y: 2, width: 2, height: 2, wallFeatures : [door] };
 
       var model = new MapModel();
       model.setRooms([north, south]);
@@ -54,8 +54,8 @@ function(QUnit, MapModel) {
     test('east', function(assert) {
 
       var door = { direction: 'east', x: 1, y: 1 };
-      var west = { x: 0, y: 0, width: 2, height: 2, wall_features : [door] };
-      var east = { x: 2, y: 0, width: 2, height: 2, wall_features : [] };
+      var west = { x: 0, y: 0, width: 2, height: 2, wallFeatures : [door] };
+      var east = { x: 2, y: 0, width: 2, height: 2, wallFeatures : [] };
 
       var model = new MapModel();
       model.setRooms([west, east]);
@@ -66,8 +66,8 @@ function(QUnit, MapModel) {
     test('west', function(assert) {
 
       var door = { direction: 'west', x: 2, y: 1 };
-      var west = { x: 0, y: 0, width: 2, height: 2, wall_features : [] };
-      var east = { x: 2, y: 0, width: 2, height: 2, wall_features : [door] };
+      var west = { x: 0, y: 0, width: 2, height: 2, wallFeatures : [] };
+      var east = { x: 2, y: 0, width: 2, height: 2, wallFeatures : [door] };
 
       var model = new MapModel();
       model.setRooms([east, west]);
@@ -101,13 +101,13 @@ function(QUnit, MapModel) {
       var eastToSoutheast = { direction: 'south', x: 5, y: 3 };
       var southToCentre = { direction: 'north', x: 2, y: 4 };
 
-      var north = { x:  2, y: 0, width: 2, height: 2, wall_features: [] };
-      var west = { x:  0, y: 2, width: 2, height: 2, wall_features : [westToCentre] };
-      var centre = { x: 2, y: 2, width: 2, height: 2, wall_features : [centreToNorth, centreToWest] };
-      var east = { x: 4, y: 2, width: 2, height: 2, wall_features : [eastToSoutheast, eastToCentre] };
-      var southwest = { x: 0, y: 4, width: 2, height: 2, wall_features : [] };
-      var south = { x: 2, y: 4, width: 2, height: 2, wall_features : [southToCentre] };
-      var southeast = { x: 4, y: 4, width: 2, height: 2, wall_features : [] };
+      var north = { x:  2, y: 0, width: 2, height: 2, wallFeatures: [] };
+      var west = { x:  0, y: 2, width: 2, height: 2, wallFeatures : [westToCentre] };
+      var centre = { x: 2, y: 2, width: 2, height: 2, wallFeatures : [centreToNorth, centreToWest] };
+      var east = { x: 4, y: 2, width: 2, height: 2, wallFeatures : [eastToSoutheast, eastToCentre] };
+      var southwest = { x: 0, y: 4, width: 2, height: 2, wallFeatures : [] };
+      var south = { x: 2, y: 4, width: 2, height: 2, wallFeatures : [southToCentre] };
+      var southeast = { x: 4, y: 4, width: 2, height: 2, wallFeatures : [] };
 
       var model = new MapModel();
       model.setRooms([north, south, east, west, centre, southeast, southwest]);
