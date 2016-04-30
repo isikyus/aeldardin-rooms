@@ -48,6 +48,7 @@ function($) {
     $.each(rooms, function(index, room) {
       room.id = parseInt(index);
       room.key = room.id + 1;
+      room.wallFeatures = room.wallFeatures || [];
     });
   };
 
@@ -96,6 +97,53 @@ function($) {
 
       // Created by addDerivedFields()
       return room.id;
+    },
+
+    /*
+     * Add a door, and return its ID.
+     * The owning room is automatically determined based on the coordinates of the door.
+     * Fails (returning false) if the proposed door would not be in a room.
+     *
+     * Direction is a string -- one of 'north', 'south', 'east', or 'west'.
+     * Door style just defaults to "door".
+     * TODO: should probably use constants for this.
+     */
+    addDoor : function(x, y, direction) {
+
+      /*
+       * Find a room containing the given coordinates,
+       * and a WallFeature ID not already in use (for the new door).
+       */
+      var containingRoom = null, newDoorId = 0;
+      $.each(this.rooms, function(_index, room) {
+
+        if (room.x <= x && x < (room.x + room.width) &&
+            room.y <= y && y < (room.y + room.height)) {
+          containingRoom = room;
+        }
+
+        $.each(room.wallFeatures, function(_index, feature) {
+          newDoorId = Math.max(feature.id, newDoorId);
+        });
+      });
+
+      // If we found one, add the proposed door.
+      if (containingRoom === null) {
+        return false;
+
+      } else {
+        containingRoom.wallFeatures.push({
+          id: newDoorId,
+          x: x,
+          y: y,
+          direction: direction,
+          style: 'door'
+        });
+
+        this.fireRoomsChanged();
+
+        return newDoorId;
+      }
     },
 
     /*
