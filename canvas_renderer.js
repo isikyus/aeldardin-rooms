@@ -203,9 +203,15 @@ function($, hitRegions, symbols) {
     }
 
     regions.getFallback().addListener('mousemove', function(event) {
-
       if (action.action == 'add_room') {
         updateAddRoomAction(action, event.x, event.y);
+      }
+    });
+
+    regions.getFallback().addListener('mouseup', function(event) {
+      if (action.action == 'add_room') {
+        updateAddRoomAction(action, event.x, event.y);
+        action.finish();
       }
     });
   };
