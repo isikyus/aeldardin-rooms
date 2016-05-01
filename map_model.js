@@ -147,6 +147,54 @@ function($) {
     },
 
     /*
+     * Remove a door (specified by ID).
+     *
+     * On success, returns the door removed; on failure, returns false.
+     */
+    removeDoor : function(id) {
+
+      var removedDoor = null;
+
+      $.each(this.rooms, function(_index, room) {
+
+        // Find the index of the door with that ID, if any.
+        var indexToRemove = null;
+        $.each(room.wallFeatures, function(index, door) {
+
+          if (door.id === id) {
+            indexToRemove = index;
+
+            // Break out of $.each
+            return false;
+          }
+        });
+
+        // If we found it, remove and return the item at that index.
+        if (indexToRemove !== null) {
+
+          removedDoor = room.wallFeatures[indexToRemove];
+          room.wallFeatures.splice(indexToRemove, 1);
+
+          // Break out of $.each
+          return false;
+        }
+
+        // Haven't removed anything yet, so keep going...
+      });
+
+      if (removedDoor !== null) {
+
+        this.fireRoomsChanged();
+        return removedDoor;
+
+      } else {
+
+        // We found nothing matching that ID; give up.
+        return false;
+      }
+    },
+
+    /*
      * Try to remove the given room from the map.
      * On success, returns the given room; on failure, returns false.
      */

@@ -112,46 +112,48 @@ function(QUnit, MapModel) {
 
     test('removing a door', function(assert) {
       var doorId = 10;
+      var door = {id: doorId, x : 11, y: 7, direction: 'north', style: 'door'};
+      var otherDoor = {id: doorId + 1, x : 10, y: 6, direction: 'south', style: 'door'};
       var model = new MapModel();
       model.setRooms([
-        {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2},
+        {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2, wallFeatures: [otherDoor]},
         {
           id: 1, key: 2, x: 10, y: 7, width: 2, height: 3,
-          wallFeatures: [
-            {id: doorId, x : 11, y: 7, direction: 'north', style: 'door'}
-          ]
+          wallFeatures: [door]
         }
       ]);
 
-      assert.expect(3);
+      assert.expect(4);
       model.addRoomsListener(function(_rooms) {
         assert.ok(true, 'Fires change events');
       });
 
       var result = model.removeDoor(doorId);
-      assert.strictEqual(result, doorId, 'Returns door id on success');
+      assert.strictEqual(result, door, 'Returns door object on success');
 
+      assert.deepEqual(model.getRooms()[0].wallFeatures, [otherDoor], "Doesn't remove other doors");
       assert.deepEqual(model.getRooms()[1].wallFeatures, []);
     });
 
     test("removing a door that doens't exist", function(assert) {
       var doorId = 10;
+      var otherDoor = {id: doorId + 1, x : 10, y: 6, direction: 'south', style: 'door'};
       var model = new MapModel();
       model.setRooms([
         {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2},
-        {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3}
+        {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3, wallFeatures: [otherDoor]}
       ]);
 
-      assert.expect(2);
+      assert.expect(3);
       model.addRoomsListener(function(_rooms) {
         assert.ok(false, "Doesn't fire events if a change fails.");
       });
 
       var result = model.removeDoor(doorId);
-      assert.notOk(result, 'Returns false on failure');
+      assert.strictEqual(result, false, 'Returns false on failure');
 
-      assert.deepEqual(model.getRooms()[0].wallFeatures, []);
-      assert.deepEqual(model.getRooms()[1].wallFeatures, []);
+      assert.deepEqual(model.getRooms()[0].wallFeatures, [], "Doesn't remove other doors");
+      assert.deepEqual(model.getRooms()[1].wallFeatures, [otherDoor]);
     });
   };
   return { run : run }
