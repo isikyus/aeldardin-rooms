@@ -106,6 +106,43 @@ function(QUnit, MapController) {
       assert.hasSubstring(newRoomDiv.text(), '15 feet north-to-south', 'includes correct height');
 
     });
+
+    QUnit.module('HTML UI -- Adding doors');
+
+    test('adding a door joining two rooms', function(assert) {
+      var mapDiv = $('#test-map');
+      var controller = new MapController(mapDiv.find('canvas')[0]);
+      var map = controller.model.map;
+
+      // Create a simple map.
+      var rooms = [
+        { id: 0, x: 3, y: 0, width: 4, height: 2, wallFeatures: [] },
+        { id: 1, x: 5, y: 2, width: 2, height: 2, wallFeatures: [] },
+      ];
+      map.setRooms(rooms);
+
+      // Open the add-door form, and pick a direction.
+      mapDiv.find('#room_0_data .js-add_door').click();
+      mapDiv.find('#door-direction').val('south');
+
+      // Check the available locations make sense.
+      // TODO: write a separate test for door position names.
+      var positionOptions = mapDiv.find('select#door-x').find('option');
+      assert.strictEqual(positionOptions.find('[value=3]').text(), 'East corner (to nowhere)');
+      assert.strictEqual(positionOptions.last('[value=4]').text(), '5 feet from east (to nowhere)');
+      assert.strictEqual(positionOptions.last('[value=5]').text(), '5 feet from west (to Room 2)');
+      assert.strictEqual(positionOptions.last('[value=6]').text(), 'West corner (to Room 2)');
+
+      // Choose a location and create the door.
+      mapDiv.find('select#door-x').val(5);
+      mapDiv.find('#submit-add-door').click();
+
+      // Check the door was created correctly.
+      var newDoorDiv = mapDiv.find('#room_0_data #door_0');
+      assert.equal(newDoorDiv.length, 1, 'Should create a details block for that door');
+      assert.hasSubstring(newDoorDiv.text(), 'in the south wall', 'Should get location right');
+      assert.strictEqual(newDoorDiv.find('li a[href=#room_0]').text(), 'Room 1', 'Should get destination right');
+    });
   };
   return { run : run }
 });
