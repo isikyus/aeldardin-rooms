@@ -102,8 +102,8 @@ function(QUnit, MapController) {
       assert.equal(newRoomDiv.find('.edit-room').data('room-key'), 1, 'gives the new room a key of 1');
 
       // One square is five feet; the code works in squares, but the user sees text in feet.
-      assert.ok(newRoomDiv.text().indexOf('25 feet east-to-west') !== -1, 'includes correct width');
-      assert.ok(newRoomDiv.text().indexOf('15 feet north-to-south') !== -1, 'includes correct height');
+      assert.hasSubstring(newRoomDiv.text(), '25 feet east-to-west', 'includes correct width');
+      assert.hasSubstring(newRoomDiv.text(), '15 feet north-to-south', 'includes correct height');
 
     });
   };
