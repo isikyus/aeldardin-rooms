@@ -24,7 +24,7 @@ function($, Handlebars) {
 
   var rawRoomTemplate = "" +
     '<div class="room">' +
-      '<h3><a id="room_{{id}}">Room {{key}}</id></h3>' +
+      '<h3><a id="room_{{id}}">Room {{key}}</a></h3>' +
       '<p>' +
         'A bare room. ' +
         'It measures {{height}} feet north-to-south, ' +
