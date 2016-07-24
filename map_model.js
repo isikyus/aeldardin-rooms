@@ -123,7 +123,7 @@ function($) {
         }
 
         $.each(room.wallFeatures, function(_index, feature) {
-          newDoorId = Math.max(feature.id, newDoorId);
+          newDoorId = Math.max(feature.id + 1, newDoorId);
         });
       });
 

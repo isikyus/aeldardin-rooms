@@ -89,6 +89,39 @@ function(QUnit, MapModel) {
       );
     });
 
+    test('setting ID of new doors', function(assert) {
+      var model = new MapModel();
+      model.setRooms([
+        {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2},
+        {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3}
+      ]);
+
+      var firstDoorId = model.addDoor(11, 7, 'north');
+      var secondDoorId = model.addDoor(10, 6, 'south');
+      var thirdDoorId = model.addDoor(13, 5, 'west');
+
+      assert.strictEqual(firstDoorId, 0, 'Allocates ID 0 when no existing doors');
+      assert.deepEqual([secondDoorId, thirdDoorId], [1, 2], 'Allocates successive IDs for successive doors');
+
+      assert.deepEqual(model.getRooms()[0],
+        {
+          id: 0, key: 1, x: 10, y: 5, width: 4, height: 2,
+          wallFeatures: [
+            {id: secondDoorId, x : 10, y: 6, direction: 'south', style: 'door'},
+            {id: thirdDoorId, x : 13, y: 5, direction: 'west', style: 'door'},
+          ]
+        }
+      );
+      assert.deepEqual(model.getRooms()[1],
+        {
+          id: 1, key: 2, x: 10, y: 7, width: 2, height: 3,
+          wallFeatures: [
+            {id: firstDoorId, x : 11, y: 7, direction: 'north', style: 'door'}
+          ]
+        }
+      );
+    });
+
     test('adding a door with no containing room', function(assert) {
       var model = new MapModel();
       model.setRooms([
