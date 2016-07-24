@@ -38,7 +38,38 @@ function(QUnit, MapController) {
       assert.equal(mapDiv.find('#room_2').length, 0, 'Should delete room 2');
     });
 
-    QUnit.module('Adding rooms');
+    test('deleting doors', function(assert) {
+      var mapDiv = $('#test-map');
+      var controller = new MapController(mapDiv.find('canvas')[0]);
+      var map = controller.model.map;
+
+      // Create a simple map.
+      var rooms = [
+        { id: 0, x: 0, y: 0, width: 3, height: 2, wallFeatures: [] },
+        { id: 1, x: 0, y: 2, width: 3, height: 2, wallFeatures: [] },
+        { id: 2, x: 3, y: 0, width: 2, height: 4, wallFeatures: [] },
+      ];
+      map.setRooms(rooms);
+
+      // Add some doors.
+      var southDoorId = map.addDoor(0, 1, 'south');
+      var northDoorId = map.addDoor(2, 2, 'north');
+      var eastDoorId = map.addDoor(2, 2, 'east');
+
+      // Select two of those doors, and delete them.
+      mapDiv.find('#select_door_' + southDoorId).click();
+      mapDiv.find('#select_door_' + eastDoorId).click();
+      mapDiv.find('#delete_selection').click();
+
+      // Confirm that only the third door remains.
+      assert.deepEqual(mapDiv.find('#room_0_data .exits li').length, 0, 'Should delete the southwards door');
+
+      var roomOneExits = mapDiv.find('#room_1_data .exits');
+      assert.deepEqual(roomOneExits.find('#door_' + eastDoorId).length, 0, 'Should delete the door leading west');
+      assert.deepEqual(roomOneExits.find('#door_' + northDoorId).length, 1, 'Should keep the door north to the other room');
+    });
+
+    QUnit.module('HTML UI -- Adding rooms');
 
     test('creates the room', function(assert) {
       // TODO: extract to helper

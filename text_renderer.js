@@ -23,7 +23,7 @@ function($, Handlebars) {
   //})();
 
   var rawRoomTemplate = "" +
-    '<div class="room">' +
+    '<div class="room" id="room_{{id}}_data">' +
       '<h3><a id="room_{{id}}">Room {{key}}</a></h3>' +
       '<p>' +
         'A bare room. ' +
@@ -33,9 +33,9 @@ function($, Handlebars) {
       '<p>' +
         'There are {{exits.length}} exits:' +
       '</p>' +
-      '<ol>' +
+      '<ol class="exits">' +
         '{{#each exits}}' +
-          '<li>' +
+          '<li id="door_{{door.id}}">' +
             'A {{displayDoorType door.style}} in the {{door.direction}} wall, ' +
             'leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.' +
           '</li>' +
