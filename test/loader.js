@@ -5,7 +5,9 @@
 
 require.config({
     paths: {
-        'QUnit': 'lib/qunit-1.19.0'
+        'QUnit': 'lib/qunit-1.19.0',
+        'jquery': 'lib/jquery',
+        'handlebars': 'lib/handlebars'
     },
     shim: {
        'QUnit': {
