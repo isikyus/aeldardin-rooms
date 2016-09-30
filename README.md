@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/github/isikyus/aeldardin-rooms/badges/gpa.svg)](https://codeclimate.com/github/isikyus/aeldardin-rooms)
+
 # aeldardin-rooms
 Abstract representation of maps for tabletop RPGs
 
