@@ -4,7 +4,7 @@ require.config({
     paths: {
         'jquery': 'vendor/jquery',
         'handlebars': 'vendor/handlebars'
-    },
+    }
 });
 
 require([
