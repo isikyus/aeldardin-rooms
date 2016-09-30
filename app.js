@@ -1,7 +1,14 @@
 // Root file loaded by RequireJS
 
+require.config({
+    paths: {
+        'jquery': 'lib/jquery',
+        'handlebars': 'lib/handlebars'
+    },
+});
+
 require([
-    'jquery',
+    'jQuery',
     'map_controller'
   ],
 function($, MapController) {
