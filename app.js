@@ -2,13 +2,13 @@
 
 require.config({
     paths: {
-        'jquery': 'lib/jquery',
-        'handlebars': 'lib/handlebars'
+        'jquery': 'vendor/jquery',
+        'handlebars': 'vendor/handlebars'
     },
 });
 
 require([
-    'jQuery',
+    'jquery',
     'map_controller'
   ],
 function($, MapController) {
