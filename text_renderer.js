@@ -35,9 +35,15 @@ function($, Handlebars) {
       '</p>' +
       '<ol class="exits">' +
         '{{#each exits}}' +
-          '<li id="door_{{door.id}}">' +
-            'A {{displayDoorType door.style}} in the {{door.direction}} wall, ' +
-            'leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.' +
+          '<li id="door_{{door.id}}" class="js-door" data-door-id="{{door.id}}">' +
+            '<label>' +
+              '<input type="checkbox" id="select_door_{{door.id}}"' +
+                  ' class="js-select-door-checkbox"' +
+                  ' {{#if door.selected}}checked{{/if}} />' +
+              // TODO: this is wrong -- the door direction may need reversing if it belongs to a square in the other room.
+              'A {{displayDoorType door.style}} in the {{door.direction}} wall, ' +
+              'leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.' +
+            '</label>' +
           '</li>' +
         '{{/each}}' +
       '</ol>' +
@@ -173,6 +179,28 @@ function($, Handlebars) {
           model.selection.select(matchingRooms[0].id);
         } else {
           model.selection.deselect(matchingRooms[0].id);
+        }
+      };
+    });
+
+    $container.on('click', '.js-select-door-checkbox', function(event) {
+      var id = $(this).closest('li.js-door').data('door-id');
+      var matchingDoors = $.grep(model.map.getDoors(), function(door) {
+        return door.id === id;
+      });
+
+      if (matchingDoors.length === 0) {
+        console.log('No doors found matching key: ' + key);
+      } else {
+        if (matchingDoors.length > 1) {
+          console.log('Found several doors for ' + key + '; selecting/deselecting only the first:');
+          console.log(matchingDoors);
+        }
+
+        if ($(this).is(':checked')) {
+          model.selection.doors.select(matchingDoors[0].id);
+        } else {
+          model.selection.doors.deselect(matchingDoors[0].id);
         }
       };
     });

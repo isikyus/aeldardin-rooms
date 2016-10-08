@@ -62,11 +62,13 @@ function(QUnit, MapController) {
       mapDiv.find('#delete_selection').click();
 
       // Confirm that only the third door remains.
-      assert.deepEqual(mapDiv.find('#room_0_data .exits li').length, 0, 'Should delete the southwards door');
+      var roomZeroExits = mapDiv.find('#room_0_data .exits');
+      assert.equal(roomZeroExits.find('#door_' + southDoorId).length, 0, 'Should delete the southwards door');
+      assert.equal(roomZeroExits.find('#door_' + northDoorId).length, 1, 'Should delete the door north from the other room');
 
       var roomOneExits = mapDiv.find('#room_1_data .exits');
-      assert.deepEqual(roomOneExits.find('#door_' + eastDoorId).length, 0, 'Should delete the door leading west');
-      assert.deepEqual(roomOneExits.find('#door_' + northDoorId).length, 1, 'Should keep the door north to the other room');
+      assert.equal(roomOneExits.find('#door_' + eastDoorId).length, 0, 'Should delete the door leading west');
+      assert.equal(roomOneExits.find('#door_' + northDoorId).length, 1, 'Should keep the door north to the other room');
     });
 
     QUnit.module('HTML UI -- Adding rooms');
