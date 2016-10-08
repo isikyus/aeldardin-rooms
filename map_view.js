@@ -25,13 +25,21 @@ function($, canvasRenderer, textRenderer) {
     $toolbar.find('#delete_selection').on('click', function() {
 
       // TODO: it would probably be more efficient to get the list of selected rooms from the selection model.
-      var toDelete = [];
+      var roomsToDelete = [];
       $.each(model.map.getRooms(), function(_index, room) {
         if (model.selection.isSelected(room.id)) {
-          toDelete.push(room);
+          roomsToDelete.push(room);
         }
       });
-      $.each(toDelete, function(_index, room) { model.map.removeRoom(room); });
+      $.each(roomsToDelete, function(_index, room) { model.map.removeRoom(room); });
+
+      var doorsToDelete = [];
+      $.each(model.map.getDoors(), function(_index, door) {
+        if (model.selection.doors.isSelected(door.id)) {
+          doorsToDelete.push(door);
+        }
+      });
+      $.each(doorsToDelete, function(_index, door) { model.map.removeDoor(door.id); });
     });
 
     $toolbar.find('#add_room').on('click', function() {

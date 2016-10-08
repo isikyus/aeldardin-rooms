@@ -14,6 +14,7 @@ function($, MapModel, SelectionModel, ActionModel, MapView) {
       selection : new SelectionModel(),
       action : new ActionModel()
     };
+    this.model.selection.doors = new SelectionModel();
     this.view = new MapView(this.model, canvas);
 
     // When actions are completed, apply the results to the map.

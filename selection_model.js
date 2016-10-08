@@ -15,14 +15,14 @@ function($) {
         return false;
       } else {
         this.store[item] = true;
-        this.fireRoomsChanged();
+        this.fireChanged();
         return true;
       }
     },
     deselect : function(item) {
       if (item in this.store) {
         delete this.store[item];
-        this.fireRoomsChanged();
+        this.fireChanged();
         return true;
       } else {
         return false;
@@ -34,7 +34,7 @@ function($) {
     addListener : function (listener) {
       this.listeners.push(listener);
     },
-    fireRoomsChanged : function() {
+    fireChanged : function() {
       var self = this;
       $.each(this.listeners, function(_index, listener) {
         listener(self);
