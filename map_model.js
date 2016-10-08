@@ -53,7 +53,15 @@ function($) {
   };
 
   MapModel.prototype = {
-    getDoors : function() { return doors; },
+    getDoors : function() {
+        var doors = [];
+
+        $.each(this.rooms, function(_index, room) {
+           doors = doors.concat(room.wallFeatures);
+        });
+
+        return doors;
+    },
     exits    : function(room) {
       var exits = [];
 

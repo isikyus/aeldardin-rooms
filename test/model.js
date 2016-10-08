@@ -38,6 +38,7 @@ function(QUnit, MapModel) {
 
       assert.deepEqual(model.exits(north), [{ door: door, room: south }]);
       assert.deepEqual(model.exits(south), [{ door: door, room: north }]);
+      assert.deepEqual(model.getDoors(), [door]);
     });
     test('north', function(assert) {
 
@@ -50,6 +51,7 @@ function(QUnit, MapModel) {
 
       assert.deepEqual(model.exits(north), [{ door: door, room: south }]);
       assert.deepEqual(model.exits(south), [{ door: door, room: north }]);
+      assert.deepEqual(model.getDoors(), [door]);
     });
     test('east', function(assert) {
 
@@ -62,6 +64,7 @@ function(QUnit, MapModel) {
 
       assert.deepEqual(model.exits(west), [{ door: door, room: east }]);
       assert.deepEqual(model.exits(east), [{ door: door, room: west }]);
+      assert.deepEqual(model.getDoors(), [door]);
     });
     test('west', function(assert) {
 
@@ -74,6 +77,7 @@ function(QUnit, MapModel) {
 
       assert.deepEqual(model.exits(west), [{ door: door, room: east }]);
       assert.deepEqual(model.exits(east), [{ door: door, room: west }]);
+      assert.deepEqual(model.getDoors(), [door]);
     });
 
     test('multiple exits', function(assert) {
@@ -111,6 +115,11 @@ function(QUnit, MapModel) {
 
       var model = new MapModel();
       model.setRooms([north, south, east, west, centre, southeast, southwest]);
+
+      assert.unorderedEqual(model.getDoors(), [westToCentre, centreToNorth,
+                                              centreToWest, eastToSoutheast,
+                                              eastToCentre, southToCentre],
+                                              'Includes all defined doors');
 
       assert.unorderedEqual(model.exits(centre), [
         { door: centreToNorth, room: north },
