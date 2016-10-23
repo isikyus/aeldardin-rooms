@@ -125,18 +125,18 @@ function(QUnit, MapController) {
 
       // Open the add-door form, and pick a direction.
       mapDiv.find('#room_0_data .js-add_door').click();
-      mapDiv.find('#door-direction').val('south');
+      mapDiv.find('#new-door-direction').val('south').trigger('change');
 
       // Check the available locations make sense.
       // TODO: write a separate test for door position names.
-      var positionOptions = mapDiv.find('select#door-x').find('option');
-      assert.strictEqual(positionOptions.find('[value=3]').text(), 'East corner (to nowhere)');
-      assert.strictEqual(positionOptions.last('[value=4]').text(), '5 feet from east (to nowhere)');
-      assert.strictEqual(positionOptions.last('[value=5]').text(), '5 feet from west (to Room 2)');
-      assert.strictEqual(positionOptions.last('[value=6]').text(), 'West corner (to Room 2)');
+      var $positionSelect = mapDiv.find('select#new-door-position');
+      assert.strictEqual($positionSelect.find('[value=3]').text(), 'West corner'); // (to nowhere)');
+      assert.strictEqual($positionSelect.find('[value=4]').text(), '5 feet from west'); // (to nowhere)');
+      assert.strictEqual($positionSelect.find('[value=5]').text(), '5 feet from east'); // (to Room 2)');
+      assert.strictEqual($positionSelect.find('[value=6]').text(), 'East corner'); // (to Room 2)');
 
       // Choose a location and create the door.
-      mapDiv.find('select#door-x').val(5);
+      mapDiv.find('select#new-door-position').val(5);
       mapDiv.find('#submit-add-door').click();
 
       // Check the door was created correctly.
