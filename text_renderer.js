@@ -54,6 +54,7 @@ function($, Handlebars) {
           'Select' +
         '</label></p>' +
         '<button class="js-remove-room">Remove</button>' +
+        '<button class="js-add_door">Add Door</button>' +
       '</div>' +
     '</div>'
   var roomTemplate = Handlebars.default.compile(rawRoomTemplate);
@@ -82,6 +83,25 @@ function($, Handlebars) {
     '</div>'
   //var createTemplate = Handlebars.default.compile(rawCreateTemplate);
 
+  var rawAddDoorTemplate = '' +
+    '<div class="add-door" id="js-add_door_form">' +
+      '<h3>Add Door</h3>' +
+      '<p id="js-room-for-door"></p>' +
+      '<p>' +
+        '<label for="new-door-direction">On which wall?</label>' +
+        '<select id="new-door-direction">' +
+          '<option value=""></option>' +
+          '<option value="north">North</option>' +
+          '<option value="south">South</option>' +
+          '<option value="east">East</option>' +
+          '<option value="west">West</option>' +
+        '</select>' +
+      '</p>' +
+      '<p>' +
+        '<label for="new-door-position">Where on that wall?</label>' +
+        '<select id="new-door-position" class="hide"></select>' +
+      '</p>' +
+    '</div>'
 
   var roomInfo = function(model, room) {
     return {
@@ -119,7 +139,6 @@ function($, Handlebars) {
       var editRoomForm = $container.find('#js-edit-room');
       if (editRoomForm.length == 0) {
         editRoomForm = $(rawCreateTemplate);
-        editRoomForm.x
       };
 
       // Set X, Y, Width, and Height based on the action state.
@@ -130,6 +149,59 @@ function($, Handlebars) {
 
       // Make sure the form is visible.
       $container.prepend(editRoomForm);
+
+    } else if (action == 'add_door') {
+
+        // Insert form if necessary.
+        var $addDoorForm = $container.find('#js-add_door_form');
+        if ($addDoorForm.length === 0) {
+            $addDoorForm = $(rawAddDoorTemplate);
+        };
+
+        // Fill in the form based on the action state.
+        $addDoorForm.find('#js-room-for-door').text('(in room ' + state.room.key + ')');
+        $addDoorForm.find('#new-door-direction').val(state.direction);
+
+        // Fill in possible positions.
+        // TODO: only do this if the direction has changed.
+        var $positionSelect = $addDoorForm.find('#new-door-position')
+        $positionSelect.empty();
+
+        if (state.direction) {
+            var startCorner, endCorner, range;
+
+            // Available positions depend on the door direction.
+            if (state.direction === 'north' || state.direction === 'south') {
+                startCorner = 'west';
+                endCorner = 'east';
+                start = state.room.x;
+                range = state.room.width;
+
+            } else if (state.direction == 'east' || state.direction === 'west') {
+                startCorner = 'north';
+                endCorner = 'south';
+                start = state.room.y;
+                range = state.room.height;
+
+            } else {
+                console.warn('Unexpected door direction: ' + state.direction);
+            }
+
+            for(var i = 0; i < range; i++) {
+                var option = $('<option />');
+                var humanDistance = feetPerSquare * i;
+                option.attr('value', i + start);
+
+                // TODO: it would be nice to have more readable options, and pick the most suitable one.
+                // ("in the centre", "east corner", "5 feet from south", etc.)
+                option.text(humanDistance + ' feet from ' + startCorner);
+
+                $positionSelect.append(option);
+            }
+
+        }
+
+        $container.prepend($addDoorForm);
 
     } else {
       console.warn('unexpected action ' + action);
@@ -219,7 +291,7 @@ function($, Handlebars) {
         };
         model.action.update(roomProperties);
       } else {
-        console.warn('Tried to finish adding room when not in that state');
+        console.warn('Tried to work on adding room when not in that state');
       };
     });
 
@@ -228,6 +300,55 @@ function($, Handlebars) {
         model.action.finish('add_room');
       } else {
         console.warn('Tried to finish adding room when not in that state');
+      };
+    });
+
+    $container.on('click', '.js-add_door', function(event) {
+      var key = $(this).closest('div.edit-room').data('room-key');
+      var matchingRooms = $.grep(model.map.getRooms(), function(room) {
+        return room.key === key;
+      });
+
+      if (matchingRooms.length === 0) {
+        console.log('No rooms found matching key: ' + key);
+      } else {
+        if (matchingRooms.length > 1) {
+          console.log('Found several rooms for ' + key + '; removing only the first:');
+          console.log(matchingRooms);
+        }
+
+        model.action.start('add_door', { room: matchingRooms[0], x: null, y: null, direction: null});
+      };
+    });
+
+    // Fire update events as the add-door form changes.
+    $container.on('change', '#js-add_door_form select', function(_event) {
+
+      if (model.action.action === 'add_door') {
+
+        var $addDoorForm = $('#js-add_door_form');
+        var direction = $addDoorForm.find('#new-door-direction').val();
+        var room = model.action.actionData.room;
+
+        var newDoorX, newDoorY;
+        if (direction === 'north' || direction === 'south') {
+            newDoorX = $addDoorForm.find('#new-door-position').val();
+            newDoorY = (direction === 'north') ? room.y : room.y + room.height;
+
+        } else if (direction === 'east' || direction === 'west') {
+            newDoorX = (direction === 'west') ? room.x : room.x + room.width;
+            newDoorY = $addDoorForm.find('#new-door-position').val();
+
+        } else {
+
+            // Don't know direction yet, so we can't define the door.
+            newDoorX = null;
+            newDoorY = null;
+        }
+
+        model.action.update({room: room, direction : direction, x: newDoorX, y: newDoorY });
+      } else {
+        console.warn('Tried to work on adding door when not in that state');
       };
     });
   };
