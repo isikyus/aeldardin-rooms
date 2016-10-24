@@ -168,7 +168,7 @@ function($, Handlebars) {
         $positionSelect.empty();
 
         if (state.direction) {
-            var startCorner, endCorner, range;
+            var startCorner, endCorner, start, range, selectedPosition;
 
             // Available positions depend on the door direction.
             if (state.direction === 'north' || state.direction === 'south') {
@@ -176,12 +176,14 @@ function($, Handlebars) {
                 endCorner = 'east';
                 start = state.room.x;
                 range = state.room.width;
+                selectedPosition = state.x;
 
             } else if (state.direction == 'east' || state.direction === 'west') {
                 startCorner = 'north';
                 endCorner = 'south';
                 start = state.room.y;
                 range = state.room.height;
+                selectedPosition = state.y;
 
             } else {
                 console.warn('Unexpected door direction: ' + state.direction);
@@ -190,7 +192,13 @@ function($, Handlebars) {
             for(var i = 0; i < range; i++) {
                 var option = $('<option />');
                 var humanDistance = feetPerSquare * i;
-                option.attr('value', i + start);
+                var value = i + start;
+
+                option.attr('value', value);
+
+                if (value === selectedPosition) {
+                    option.attr('selected', 'selected');
+                }
 
                 // TODO: it would be nice to have more readable options, and pick the most suitable one.
                 // ("in the centre", "east corner", "5 feet from south", etc.)
@@ -332,12 +340,12 @@ function($, Handlebars) {
 
         var newDoorX, newDoorY;
         if (direction === 'north' || direction === 'south') {
-            newDoorX = $addDoorForm.find('#new-door-position').val();
+            newDoorX = parseInt($addDoorForm.find('#new-door-position').val(), 10);
             newDoorY = (direction === 'north') ? room.y : room.y + room.height;
 
         } else if (direction === 'east' || direction === 'west') {
             newDoorX = (direction === 'west') ? room.x : room.x + room.width;
-            newDoorY = $addDoorForm.find('#new-door-position').val();
+            newDoorY = parseInt($addDoorForm.find('#new-door-position').val(), 10);
 
         } else {
 
