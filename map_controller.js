@@ -52,7 +52,12 @@ function($, MapModel, SelectionModel, ActionModel, MapView) {
 
           // TODO: do I want to validate anything here?
           // TODO: should addDoor let me pass in the parent room?
-          model.map.addDoor(data.x, data.y, data.direction);
+          var worked = model.map.addDoor(data.x, data.y, data.direction);
+
+          if (!worked) {
+            // TODO: should I be using exceptions for this?
+            console.warn('Failed to add door ' + data.direction + ' at (' + data.x + ', ' + data.y + ')');
+          };
 
         } else {
 
