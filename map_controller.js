@@ -47,6 +47,13 @@ function($, MapModel, SelectionModel, ActionModel, MapView) {
           }
 
           model.map.addRoom(x, y, width, height);
+
+        } else if (action === 'add_door') {
+
+          // TODO: do I want to validate anything here?
+          // TODO: should addDoor let me pass in the parent room?
+          model.map.addDoor(data.x, data.y, data.direction);
+
         } else {
 
           // We don't support whatever this is -- bail out.

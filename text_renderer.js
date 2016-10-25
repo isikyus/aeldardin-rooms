@@ -80,6 +80,7 @@ function($, Handlebars) {
       '</p>' +
       '<p>' +
         '<button id="submit-add-room">Add Room</button>' +
+      '</p>' +
     '</div>'
   //var createTemplate = Handlebars.default.compile(rawCreateTemplate);
 
@@ -100,6 +101,9 @@ function($, Handlebars) {
       '<p>' +
         '<label for="new-door-position">Where on that wall?</label>' +
         '<select id="new-door-position" class="hide"></select>' +
+      '</p>' +
+      '<p>' +
+        '<button id="submit-add-door">Add Door</button>' +
       '</p>' +
     '</div>'
 
@@ -357,6 +361,14 @@ function($, Handlebars) {
         model.action.update({room: room, direction : direction, x: newDoorX, y: newDoorY });
       } else {
         console.warn('Tried to work on adding door when not in that state');
+      };
+    });
+
+    $container.on('click', '#submit-add-door', function(_event) {
+      if (model.action.action === 'add_door') {
+        model.action.finish('add_door');
+      } else {
+        console.warn('Tried to finish adding door when not in that state');
       };
     });
   };
