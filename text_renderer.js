@@ -342,13 +342,14 @@ function($, Handlebars) {
         var direction = $addDoorForm.find('#new-door-direction').val();
         var room = model.action.actionData.room;
 
+        // TODO: need separate tests for these calculations.
         var newDoorX, newDoorY;
         if (direction === 'north' || direction === 'south') {
             newDoorX = parseInt($addDoorForm.find('#new-door-position').val(), 10);
             newDoorY = (direction === 'north') ? room.y : room.y + room.height - 1;
 
         } else if (direction === 'east' || direction === 'west') {
-            newDoorX = (direction === 'west') ? room.x - 1: room.x + room.width;
+            newDoorX = (direction === 'west') ? room.x: room.x + room.width - 1;
             newDoorY = parseInt($addDoorForm.find('#new-door-position').val(), 10);
 
         } else {
