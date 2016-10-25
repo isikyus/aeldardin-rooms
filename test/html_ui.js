@@ -130,10 +130,10 @@ function(QUnit, MapController) {
       // Check the available locations make sense.
       // TODO: write a separate test for door position names.
       var $positionSelect = mapDiv.find('select#new-door-position');
-      assert.strictEqual($positionSelect.find('[value=3]').text(), 'West corner'); // (to nowhere)');
-      assert.strictEqual($positionSelect.find('[value=4]').text(), '5 feet from west'); // (to nowhere)');
-      assert.strictEqual($positionSelect.find('[value=5]').text(), '5 feet from east'); // (to Room 2)');
-      assert.strictEqual($positionSelect.find('[value=6]').text(), 'East corner'); // (to Room 2)');
+      assert.strictEqual($positionSelect.find('[value=3]').text(), '0 feet from west');
+      assert.strictEqual($positionSelect.find('[value=4]').text(), '5 feet from west');
+      assert.strictEqual($positionSelect.find('[value=5]').text(), '10 feet from west');
+      assert.strictEqual($positionSelect.find('[value=6]').text(), '15 feet from west');
 
       // Choose a location and create the door.
       var doorX = 5;
