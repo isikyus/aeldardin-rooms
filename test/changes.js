@@ -89,6 +89,40 @@ function(QUnit, MapModel) {
       );
     });
 
+    test('adding doors in all directions', function(assert) {
+      var model = new MapModel();
+
+      // A cross-shaped map:
+      //   0
+      // 1 2 3
+      //   4
+      model.setRooms([
+        {id: 0, key: 1, x: 2, y: 0, width: 2, height: 2},
+        {id: 1, key: 2, x: 0, y: 2, width: 2, height: 2},
+        {id: 2, key: 3, x: 2, y: 2, width: 2, height: 2},
+        {id: 3, key: 4, x: 4, y: 2, width: 2, height: 2},
+        {id: 4, key: 5, x: 2, y: 4, width: 2, height: 2}
+      ]);
+
+      // Test all four door directions.
+      var newDoorIds = [
+        model.addDoor(2, 2, 'north'),
+        model.addDoor(2, 3, 'east'),
+        model.addDoor(3, 2, 'west'),
+        model.addDoor(3, 3, 'south')
+      ];
+      assert.deepEqual(newDoorIds, [0, 1, 2, 3], 'Allocates door IDs in succession');
+
+      assert.deepEqual(model.getRooms()[2].wallFeatures,
+        [
+          { id: newDoorIds[0], x : 2, y: 2, direction: 'north', style: 'door' },
+          { id: newDoorIds[1], x : 2, y: 3, direction: 'east', style: 'door' },
+          { id: newDoorIds[2], x : 3, y: 2, direction: 'west', style: 'door' },
+          { id: newDoorIds[3], x : 3, y: 3, direction: 'south', style: 'door' }
+        ]
+      );
+    });
+
     test('setting ID of new doors', function(assert) {
       var model = new MapModel();
       model.setRooms([
