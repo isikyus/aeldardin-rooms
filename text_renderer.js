@@ -343,14 +343,20 @@ function($, Handlebars) {
         var room = model.action.actionData.room;
 
         // TODO: need separate tests for these calculations.
+
+        var newDoorPosition = parseInt($addDoorForm.find('#new-door-position').val(), 10);
         var newDoorX, newDoorY;
         if (direction === 'north' || direction === 'south') {
-            newDoorX = parseInt($addDoorForm.find('#new-door-position').val(), 10);
+
+            // Make sure position is set if direction is known, since it will look set in the form.
+            newDoorX = newDoorPosition || room.x;
             newDoorY = (direction === 'north') ? room.y : room.y + room.height - 1;
 
         } else if (direction === 'east' || direction === 'west') {
             newDoorX = (direction === 'west') ? room.x: room.x + room.width - 1;
-            newDoorY = parseInt($addDoorForm.find('#new-door-position').val(), 10);
+
+            // Again, make sure we set position.
+            newDoorY = newDoorPosition || room.y;
 
         } else {
 
