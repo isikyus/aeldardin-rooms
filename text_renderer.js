@@ -345,10 +345,10 @@ function($, Handlebars) {
         var newDoorX, newDoorY;
         if (direction === 'north' || direction === 'south') {
             newDoorX = parseInt($addDoorForm.find('#new-door-position').val(), 10);
-            newDoorY = (direction === 'north') ? room.y : room.y + room.height;
+            newDoorY = (direction === 'north') ? room.y : room.y + room.height - 1;
 
         } else if (direction === 'east' || direction === 'west') {
-            newDoorX = (direction === 'west') ? room.x : room.x + room.width;
+            newDoorX = (direction === 'west') ? room.x - 1: room.x + room.width;
             newDoorY = parseInt($addDoorForm.find('#new-door-position').val(), 10);
 
         } else {
