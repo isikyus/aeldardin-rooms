@@ -171,46 +171,29 @@ function($, Handlebars) {
         var $positionSelect = $addDoorForm.find('#new-door-position')
         $positionSelect.empty();
 
-        if (state.direction) {
-            var startCorner, endCorner, start, range, selectedPosition;
+        var wall = state.room.getWalls()[state.direction];
+        if (wall) {
 
-            // Available positions depend on the door direction.
-            if (state.direction === 'north' || state.direction === 'south') {
-                startCorner = 'west';
-                endCorner = 'east';
-                start = state.room.x;
-                range = state.room.width;
-                selectedPosition = state.x;
-
-            } else if (state.direction == 'east' || state.direction === 'west') {
-                startCorner = 'north';
-                endCorner = 'south';
-                start = state.room.y;
-                range = state.room.height;
-                selectedPosition = state.y;
-
-            } else {
-                console.warn('Unexpected door direction: ' + state.direction);
-            }
-
-            for(var i = 0; i < range; i++) {
+            for(var i = 0; i < wall.length; i++) {
                 var option = $('<option />');
                 var humanDistance = feetPerSquare * i;
-                var value = i + start;
+                var value = i + wall.start;
 
                 option.attr('value', value);
 
-                if (value === selectedPosition) {
+                // Make sure the option corresponding to the proposed door position is selected.
+                if (value === state[wall.parallelAxis]) {
                     option.attr('selected', 'selected');
                 }
 
                 // TODO: it would be nice to have more readable options, and pick the most suitable one.
                 // ("in the centre", "east corner", "5 feet from south", etc.)
-                option.text(humanDistance + ' feet from ' + startCorner);
+                option.text(humanDistance + ' feet from ' + wall.runsFrom);
 
                 $positionSelect.append(option);
             }
-
+        } else {
+            console.warn('Unexpected door direction: ' + state.direction);
         }
 
         $container.prepend($addDoorForm);

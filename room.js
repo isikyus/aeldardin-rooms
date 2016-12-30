@@ -35,7 +35,7 @@ function() {
           position: this.y,
           start: this.x,
           length: this.width,
-          runsFrom: 'east'
+          runsFrom: 'west'
         },
         south : {
           parallelAxis: 'x',
@@ -43,7 +43,7 @@ function() {
           position: this.y + this.height,
           start: this.x,
           length: this.width,
-          runsFrom: 'east'
+          runsFrom: 'west'
         },
         east : {
           parallelAxis: 'y',
