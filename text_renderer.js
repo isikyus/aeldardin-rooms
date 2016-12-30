@@ -79,7 +79,7 @@ function($, Handlebars) {
         '<input type="number" id="new-room-height"/>' +
       '</p>' +
       '<p>' +
-        '<button id="submit-add-room">Add Room</button>' +
+        '<button id="submit-add-room" data-finish-action="add_room">Add Room</button>' +
       '</p>' +
     '</div>'
   //var createTemplate = Handlebars.default.compile(rawCreateTemplate);
@@ -103,7 +103,7 @@ function($, Handlebars) {
         '<select id="new-door-position" class="hide"></select>' +
       '</p>' +
       '<p>' +
-        '<button id="submit-add-door">Add Door</button>' +
+        '<button id="submit-add-door" data-finish-action="add_door">Add Door</button>' +
       '</p>' +
     '</div>'
 
@@ -177,7 +177,7 @@ function($, Handlebars) {
             for(var i = 0; i < wall.length; i++) {
                 var option = $('<option />');
                 var humanDistance = feetPerSquare * i;
-                var value = i + wall.start;
+                var value = i + parseInt(wall.start, 10);
 
                 option.attr('value', value);
 
@@ -290,14 +290,6 @@ function($, Handlebars) {
       };
     });
 
-    $container.on('click', '#submit-add-room', function(_event) {
-      if (model.action.action === 'add_room') {
-        model.action.finish('add_room');
-      } else {
-        console.warn('Tried to finish adding room when not in that state');
-      };
-    });
-
     $container.on('click', '.js-add_door', function(event) {
       var key = $(this).closest('div.edit-room').data('room-key');
       var matchingRooms = $.grep(model.map.getRooms(), function(room) {
@@ -354,11 +346,14 @@ function($, Handlebars) {
       };
     });
 
-    $container.on('click', '#submit-add-door', function(_event) {
-      if (model.action.action === 'add_door') {
-        model.action.finish('add_door');
+    $container.on('click', 'button[data-finish-action]', function(_event) {
+
+      // Assume this is either the add-room or add-door button.
+      var action = $(this).data('finish-action');
+      if (model.action.action === action) {
+        model.action.finish(action);
       } else {
-        console.warn('Tried to finish adding door when not in that state');
+        console.warn('Tried to finish action "' + action + '" when it was not in progress');
       };
     });
   };
