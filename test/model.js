@@ -39,6 +39,45 @@ function(QUnit, MapModel) {
       assert.strictEqual(model.rooms[1].key, roomData[1].key);
     });
 
+    test('getting wall details', function(assert) {
+      var roomData = [
+        { key: 'A', x: -2, y:  0, width: 1, height: 2, wallFeatures : [] }
+      ];
+      var model = new MapModel();
+      model.setRooms(roomData);
+
+      var room = model.getRooms()[0];
+      var walls = room.getWalls();
+
+      assert.strictEqual(walls.north.perpendicularAxis, 'y');
+      assert.strictEqual(walls.north.parallelAxis, 'x');
+      assert.strictEqual(walls.north.position, room.y);
+      assert.strictEqual(walls.north.start, room.x);
+      assert.strictEqual(walls.north.length, room.width);
+      assert.strictEqual(walls.north.runsFrom, 'east');
+
+      assert.strictEqual(walls.south.perpendicularAxis, 'y');
+      assert.strictEqual(walls.south.parallelAxis, 'x');
+      assert.strictEqual(walls.south.position, room.y + room.height);
+      assert.strictEqual(walls.south.start, room.x);
+      assert.strictEqual(walls.south.length, room.width);
+      assert.strictEqual(walls.south.runsFrom, 'east');
+
+      assert.strictEqual(walls.west.perpendicularAxis, 'x');
+      assert.strictEqual(walls.west.parallelAxis, 'y');
+      assert.strictEqual(walls.west.position, room.x);
+      assert.strictEqual(walls.west.start, room.y);
+      assert.strictEqual(walls.west.length, room.height);
+      assert.strictEqual(walls.west.runsFrom, 'north');
+
+      assert.strictEqual(walls.east.perpendicularAxis, 'x');
+      assert.strictEqual(walls.east.parallelAxis, 'y');
+      assert.strictEqual(walls.east.position, room.x + room.width);
+      assert.strictEqual(walls.east.start, room.y);
+      assert.strictEqual(walls.east.length, room.height);
+      assert.strictEqual(walls.east.runsFrom, 'north');
+    });
+
     QUnit.module('Exits');
     test('south', function(assert) {
 
