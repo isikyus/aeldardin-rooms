@@ -285,10 +285,10 @@ function($, Handlebars) {
 
         var $editRoomForm = $('#js-edit-room');
         var roomProperties = {
-          x : $editRoomForm.find('#new-room-x').val(),
-          y : $editRoomForm.find('#new-room-y').val(),
-          width : $editRoomForm.find('#new-room-width').val(),
-          height : $editRoomForm.find('#new-room-height').val()
+          x : parseInt($editRoomForm.find('#new-room-x').val(), 10),
+          y : parseInt($editRoomForm.find('#new-room-y').val(), 10),
+          width : parseInt($editRoomForm.find('#new-room-width').val(), 10),
+          height : parseInt($editRoomForm.find('#new-room-height').val(), 10)
         };
         model.action.update(roomProperties);
       } else {
