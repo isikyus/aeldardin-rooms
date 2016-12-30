@@ -103,6 +103,12 @@ function($, Room) {
      */
     addRoom : function(x, y, width, height) {
 
+      // Enforce numeric arguments, to pick up type conversion bugs.
+      if (typeof x !== 'number') { throw 'Expected numeric x, got ' + x; }
+      if (typeof y !== 'number') { throw 'Expected numeric y, got ' + y; }
+      if (typeof width !== 'number') { throw 'Expected numeric width, got ' + width; }
+      if (typeof height !== 'number') { throw 'Expected numeric height, got ' + height; }
+
       // Find a free ID for the new room:
       var newId = 0;
       $.each(this.rooms, function(_index, room) {
@@ -126,6 +132,10 @@ function($, Room) {
      * TODO: should probably use constants for this.
      */
     addDoor : function(x, y, direction) {
+
+      // Enforce numeric arguments, to pick up type conversion bugs.
+      if (typeof x !== 'number') { throw 'Expected numeric x, got ' + x; }
+      if (typeof y !== 'number') { throw 'Expected numeric y, got ' + y; }
 
       /*
        * Find a room containing the given coordinates,
