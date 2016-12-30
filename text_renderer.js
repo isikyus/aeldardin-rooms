@@ -134,73 +134,79 @@ function($, Handlebars) {
    * Renders a form for editing the intermediate state of an action.
    */
   var renderInteraction = function(action, state, container) {
-    var $container = $(container);
 
     if (action == 'add_room') {
-      // We are creating a room.
-
-      // Use the existing edit form, if present; otherwise, add it.
-      var editRoomForm = $container.find('#js-edit-room');
-      if (editRoomForm.length == 0) {
-        editRoomForm = $(rawCreateTemplate);
-      };
-
-      // Set X, Y, Width, and Height based on the action state.
-      editRoomForm.find('#new-room-x').val(state.x);
-      editRoomForm.find('#new-room-y').val(state.y);
-      editRoomForm.find('#new-room-width').val(state.width);
-      editRoomForm.find('#new-room-height').val(state.height);
-
-      // Make sure the form is visible.
-      $container.prepend(editRoomForm);
-
+      renderAddRoom(state, container);
     } else if (action == 'add_door') {
-
-        // Insert form if necessary.
-        var $addDoorForm = $container.find('#js-add_door_form');
-        if ($addDoorForm.length === 0) {
-            $addDoorForm = $(rawAddDoorTemplate);
-        };
-
-        // Fill in the form based on the action state.
-        $addDoorForm.find('#js-room-for-door').text('(in room ' + state.room.key + ')');
-        $addDoorForm.find('#new-door-direction').val(state.direction);
-
-        // Fill in possible positions.
-        // TODO: only do this if the direction has changed.
-        var $positionSelect = $addDoorForm.find('#new-door-position')
-        $positionSelect.empty();
-
-        var wall = state.room.getWalls()[state.direction];
-        if (wall) {
-
-            for(var i = 0; i < wall.length; i++) {
-                var option = $('<option />');
-                var humanDistance = feetPerSquare * i;
-                var value = i + parseInt(wall.start, 10);
-
-                option.attr('value', value);
-
-                // Make sure the option corresponding to the proposed door position is selected.
-                if (value === state[wall.parallelAxis]) {
-                    option.attr('selected', 'selected');
-                }
-
-                // TODO: it would be nice to have more readable options, and pick the most suitable one.
-                // ("in the centre", "east corner", "5 feet from south", etc.)
-                option.text(humanDistance + ' feet from ' + wall.runsFrom);
-
-                $positionSelect.append(option);
-            }
-        } else {
-            console.warn('Unexpected door direction: ' + state.direction);
-        }
-
-        $container.prepend($addDoorForm);
-
+      renderAddDoor(state, container);
     } else {
       console.warn('unexpected action ' + action);
     };
+  };
+
+  var renderAddRoom = function(state, container) {
+    var $container = $(container);
+
+    // Use the existing edit form, if present; otherwise, add it.
+    var editRoomForm = $container.find('#js-edit-room');
+    if (editRoomForm.length == 0) {
+      editRoomForm = $(rawCreateTemplate);
+    };
+
+    // Set X, Y, Width, and Height based on the action state.
+    editRoomForm.find('#new-room-x').val(state.x);
+    editRoomForm.find('#new-room-y').val(state.y);
+    editRoomForm.find('#new-room-width').val(state.width);
+    editRoomForm.find('#new-room-height').val(state.height);
+
+    // Make sure the form is visible.
+    $container.prepend(editRoomForm);
+  };
+
+  var renderAddDoor = function(state, container) {
+    var $container = $(container);
+
+      // Insert form if necessary.
+      var $addDoorForm = $container.find('#js-add_door_form');
+      if ($addDoorForm.length === 0) {
+          $addDoorForm = $(rawAddDoorTemplate);
+      };
+
+      // Fill in the form based on the action state.
+      $addDoorForm.find('#js-room-for-door').text('(in room ' + state.room.key + ')');
+      $addDoorForm.find('#new-door-direction').val(state.direction);
+
+      // Fill in possible positions.
+      // TODO: only do this if the direction has changed.
+      var $positionSelect = $addDoorForm.find('#new-door-position')
+      $positionSelect.empty();
+
+      var wall = state.room.getWalls()[state.direction];
+      if (wall) {
+
+          for(var i = 0; i < wall.length; i++) {
+              var option = $('<option />');
+              var humanDistance = feetPerSquare * i;
+              var value = i + parseInt(wall.start, 10);
+
+              option.attr('value', value);
+
+              // Make sure the option corresponding to the proposed door position is selected.
+              if (value === state[wall.parallelAxis]) {
+                  option.attr('selected', 'selected');
+              }
+
+              // TODO: it would be nice to have more readable options, and pick the most suitable one.
+              // ("in the centre", "east corner", "5 feet from south", etc.)
+              option.text(humanDistance + ' feet from ' + wall.runsFrom);
+
+              $positionSelect.append(option);
+          }
+      } else {
+          console.warn('Unexpected door direction: ' + state.direction);
+      }
+
+      $container.prepend($addDoorForm);
   };
 
   /*
