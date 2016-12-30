@@ -214,6 +214,8 @@ function($, Room) {
     /*
      * Try to remove the given room from the map.
      * On success, returns the given room; on failure, returns false.
+     *
+     * TODO: need to define whether this removes doors or not.
      */
     removeRoom : function(room) {
       var index = this.rooms.indexOf(room);
