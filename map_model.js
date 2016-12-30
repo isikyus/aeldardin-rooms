@@ -1,7 +1,8 @@
 define([
-    'jquery'
+    'jquery',
+    'room'
   ],
-function($) {
+function($, Room) {
   // MVC implementation based on example from <https://alexatnet.com/articles/model-view-controller-mvc-javascript>
 
   var MapModel = function() {
@@ -43,12 +44,15 @@ function($) {
   };
 
   var addDerivedFields = function() {
-    var rooms = this.rooms;
+    this.rooms = $.map(this.rooms, function(rawRoom, index) {
+      var room = new Room(index, rawRoom.x, rawRoom.y,
+                                  rawRoom.width, rawRoom.height,
+                                  rawRoom.wallFeatures);
 
-    $.each(rooms, function(index, room) {
-      room.id = parseInt(index);
-      room.key = room.id + 1;
-      room.wallFeatures = room.wallFeatures || [];
+      // Preserve room key if it was already set.
+      room.key = rawRoom.key || room.key;
+
+      return room;
     });
   };
 
@@ -98,9 +102,14 @@ function($) {
      * Add a room, and return its ID.
      */
     addRoom : function(x, y, width, height) {
-      var room = {x: x, y: y, width: width, height: height, wallFeatures: []}
+
+      // Find a free ID for the new room:
+      var newId = 0;
+      $.each(this.rooms, function(room) {
+        newId = Math.max(newId, room.id);
+      });
+      var room = new Room(newId, x, y, width, height, []);
       this.rooms.push(room);
-      this.addDerivedFields();
       this.fireRoomsChanged();
 
       // Created by addDerivedFields()

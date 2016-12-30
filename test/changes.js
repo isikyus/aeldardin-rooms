@@ -3,9 +3,10 @@
 "use strict";
 define([
   'QUnit',
-  'map_model'
+  'map_model',
+  'room'
 ],
-function(QUnit, MapModel) {
+function(QUnit, MapModel, Room) {
   var run = function() {
 
     QUnit.module('Rooms');
@@ -14,7 +15,7 @@ function(QUnit, MapModel) {
       var model = new MapModel();
       model.setRooms([]);
 
-      assert.expect(3);
+      assert.expect(10);
       model.addRoomsListener(function(_rooms) {
         assert.ok(true, 'Fires change events');
       });
@@ -22,7 +23,29 @@ function(QUnit, MapModel) {
       var id = model.addRoom(10, 5, 4, 2);
       assert.strictEqual(id, 0, 'Returns room id on success');
 
-      assert.deepEqual(model.getRooms(), [{x: 10, y: 5, width: 4, height: 2, id: id, key: id + 1, wallFeatures: []}]);
+      var rooms = model.getRooms();
+      assert.strictEqual(rooms.length, 1);
+      assert.strictEqual(rooms[0].x, 10);
+      assert.strictEqual(rooms[0].y, 5);
+      assert.strictEqual(rooms[0].width, 4);
+      assert.strictEqual(rooms[0].height, 2);
+      assert.strictEqual(rooms[0].id, id);
+      assert.strictEqual(rooms[0].key, id + 1);
+      assert.deepEqual(rooms[0].wallFeatures, []);
+    });
+
+    test('adding a second room', function(assert) {
+      var model = new MapModel();
+      model.setRooms([ {x: 1, y: 1, width: 2, height: 2} ]);
+
+      assert.expect(3);
+      model.addRoomsListener(function(_rooms) {
+        assert.ok(true, 'Fires change events');
+      });
+
+      var secondId = model.addRoom(9, 7, 5, 1);
+      assert.strictEqual(secondId, 1, 'Allocates valid IDs for new rooms');
+      assert.strictEqual(model.getRooms().length, 2, 'Keeps existing rooms when adding more');
     });
 
     test("removing a room", function(assert) {
@@ -32,24 +55,38 @@ function(QUnit, MapModel) {
         {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3}
       ]);
 
-      assert.expect(3);
+      assert.expect(16);
       model.addRoomsListener(function(_rooms) {
         assert.ok(true, 'Fires change events');
       });
 
       var result = model.removeRoom(model.getRooms()[1]);
-      assert.deepEqual(result, {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3, wallFeatures: []}, 'Returns removed room on success');
+      assert.strictEqual(result.id, 1, 'Returns removed room on success');
+      assert.strictEqual(result.key, 2, 'Returns removed room on success');
+      assert.strictEqual(result.x, 10, 'Removed room has correct X coordinate');
+      assert.strictEqual(result.y, 7, 'Removed room has correct Y coordinate');
+      assert.strictEqual(result.width, 2, 'Removed room has correct width');
+      assert.strictEqual(result.height, 3, 'Removed room has correct height');
+      assert.deepEqual(result.wallFeatures, [], 'Removed room has wall features');
 
-      assert.deepEqual(model.getRooms(), [
-        {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2, wallFeatures: []}
-      ]);
+      assert.strictEqual(model.getRooms().length, 1, 'Removes only the given room');
+
+      var remainingRoom = model.getRooms()[0];
+      assert.strictEqual(remainingRoom.id, 0);
+      assert.strictEqual(remainingRoom.key, 1);
+      assert.strictEqual(remainingRoom.x, 10);
+      assert.strictEqual(remainingRoom.y, 5);
+      assert.strictEqual(remainingRoom.width, 4);
+      assert.strictEqual(remainingRoom.height, 2);
+      assert.deepEqual(remainingRoom.wallFeatures, []);
     });
+
 
     test("removing a room that doesn't exist", function(assert) {
       var model = new MapModel();
       model.setRooms([{id: 0, key: 1, x: 10, y: 5, width: 4, height: 2}]);
 
-      assert.expect(2);
+      assert.expect(9);
       model.addRoomsListener(function(_rooms) {
         assert.ok(false, "Doesn't fire events if a change fails.");
       });
@@ -58,7 +95,17 @@ function(QUnit, MapModel) {
       var result = model.removeRoom({key: 1, x: 10, y: 5, width: 4, height: 2, wallFeatures: []});
       assert.notOk(result, 'Returns false on failure');
 
-      assert.deepEqual(model.getRooms(), [{id: 0, key: 1, x: 10, y: 5, width: 4, height: 2, wallFeatures: []}]);
+      var remainingRooms = model.getRooms();
+      assert.strictEqual(remainingRooms.length, 1, 'Does not actually remove a room');
+
+      var unchangedRoom = remainingRooms[0];
+      assert.strictEqual(unchangedRoom.id, 0, 'Leaves ID unchanged');
+      assert.strictEqual(unchangedRoom.key, 1, 'Leaves key unchanged');
+      assert.strictEqual(unchangedRoom.x, 10, 'Does not change X coordinates');
+      assert.strictEqual(unchangedRoom.y, 5, 'Does not change Y coordinates');
+      assert.strictEqual(unchangedRoom.width, 4, 'Does not change widths');
+      assert.strictEqual(unchangedRoom.height, 2, 'Does not change heights');
+      assert.deepEqual(unchangedRoom.wallFeatures, [], 'Does not change wall features');
     });
 
 
@@ -79,13 +126,10 @@ function(QUnit, MapModel) {
       var newDoorId = model.addDoor(11, 7, 'north');
       assert.strictEqual(newDoorId, 0, 'Returns door id on success');
 
-      assert.deepEqual(model.getRooms()[1],
-        {
-          id: 1, key: 2, x: 10, y: 7, width: 2, height: 3,
-          wallFeatures: [
-            {id: newDoorId, x : 11, y: 7, direction: 'north', style: 'door'}
-          ]
-        }
+      assert.deepEqual(model.getRooms()[1].wallFeatures, 
+        [
+          {id: newDoorId, x : 11, y: 7, direction: 'north', style: 'door'}
+        ]
       );
     });
 
@@ -137,22 +181,16 @@ function(QUnit, MapModel) {
       assert.strictEqual(firstDoorId, 0, 'Allocates ID 0 when no existing doors');
       assert.deepEqual([secondDoorId, thirdDoorId], [1, 2], 'Allocates successive IDs for successive doors');
 
-      assert.deepEqual(model.getRooms()[0],
-        {
-          id: 0, key: 1, x: 10, y: 5, width: 4, height: 2,
-          wallFeatures: [
-            {id: secondDoorId, x : 10, y: 6, direction: 'south', style: 'door'},
-            {id: thirdDoorId, x : 13, y: 5, direction: 'west', style: 'door'},
-          ]
-        }
+      assert.deepEqual(model.getRooms()[0].wallFeatures,
+        [
+          {id: secondDoorId, x : 10, y: 6, direction: 'south', style: 'door'},
+          {id: thirdDoorId, x : 13, y: 5, direction: 'west', style: 'door'},
+        ]
       );
-      assert.deepEqual(model.getRooms()[1],
-        {
-          id: 1, key: 2, x: 10, y: 7, width: 2, height: 3,
-          wallFeatures: [
-            {id: firstDoorId, x : 11, y: 7, direction: 'north', style: 'door'}
-          ]
-        }
+      assert.deepEqual(model.getRooms()[1].wallFeatures,
+        [
+          {id: firstDoorId, x : 11, y: 7, direction: 'north', style: 'door'}
+        ]
       );
     });
 
@@ -163,7 +201,7 @@ function(QUnit, MapModel) {
         {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3}
       ]);
 
-      assert.expect(2);
+      assert.expect(3);
       model.addRoomsListener(function(_rooms) {
         assert.ok(false, "Doesn't fire events if a change fails.");
       });
@@ -171,10 +209,8 @@ function(QUnit, MapModel) {
       var result = model.addDoor(5, 7, 'north');
       assert.strictEqual(result, false, 'Returns false on failure');
 
-      assert.deepEqual(model.getRooms(),[
-        {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2, wallFeatures: []},
-        {id: 1, key: 2, x: 10, y: 7, width: 2, height: 3, wallFeatures: []}
-      ]);
+      assert.deepEqual(model.getRooms()[0].wallFeatures,[]);
+      assert.deepEqual(model.getRooms()[1].wallFeatures,[]);
     });
 
     test('removing a door', function(assert) {
@@ -202,7 +238,7 @@ function(QUnit, MapModel) {
       assert.deepEqual(model.getRooms()[1].wallFeatures, []);
     });
 
-    test("removing a door that doens't exist", function(assert) {
+    test("removing a door that doesn't exist", function(assert) {
       var doorId = 10;
       var otherDoor = {id: doorId + 1, x : 10, y: 6, direction: 'south', style: 'door'};
       var model = new MapModel();
