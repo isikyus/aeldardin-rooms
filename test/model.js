@@ -15,14 +15,28 @@ function(QUnit, MapModel) {
 
       var model = new MapModel();
 
-      assert.expect(2);
+      assert.expect(13);
       model.addRoomsListener(function(_rooms) {
         assert.ok(true, "Fires change events.");
       });
 
       model.setRooms(roomData);
 
-      assert.equal(roomData, model.rooms);
+      assert.strictEqual(model.rooms[0].x, roomData[0].x);
+      assert.strictEqual(model.rooms[0].y, roomData[0].y);
+      assert.strictEqual(model.rooms[0].width, roomData[0].width);
+      assert.strictEqual(model.rooms[0].height, roomData[0].height);
+      assert.deepEqual(model.rooms[0].wallFeatures, []);
+
+      // Keys currently aren't preserved, but they should be.
+      assert.strictEqual(model.rooms[0].key, roomData[0].key);
+
+      assert.strictEqual(model.rooms[1].x, roomData[1].x);
+      assert.strictEqual(model.rooms[1].y, roomData[1].y);
+      assert.strictEqual(model.rooms[1].width, roomData[1].width);
+      assert.strictEqual(model.rooms[1].height, roomData[1].height);
+      assert.deepEqual(model.rooms[1].wallFeatures, []);
+      assert.strictEqual(model.rooms[1].key, roomData[1].key);
     });
 
     QUnit.module('Exits');
@@ -35,6 +49,10 @@ function(QUnit, MapModel) {
 
       var model = new MapModel();
       model.setRooms([north, south]);
+
+      // Reset north and south to refer to the Room objects, so equality checking works.
+      north = model.getRooms()[0];
+      south = model.getRooms()[1];
 
       assert.deepEqual(model.exits(north), [{ door: door, room: south }]);
       assert.deepEqual(model.exits(south), [{ door: door, room: north }]);
@@ -49,6 +67,10 @@ function(QUnit, MapModel) {
       var model = new MapModel();
       model.setRooms([north, south]);
 
+      // Reset north and south to refer to the Room objects, so equality checking works.
+      north = model.getRooms()[0];
+      south = model.getRooms()[1];
+
       assert.deepEqual(model.exits(north), [{ door: door, room: south }]);
       assert.deepEqual(model.exits(south), [{ door: door, room: north }]);
       assert.deepEqual(model.getDoors(), [door]);
@@ -62,6 +84,10 @@ function(QUnit, MapModel) {
       var model = new MapModel();
       model.setRooms([west, east]);
 
+      // Reset east and west to refer to the Room objects, so equality checking works.
+      west = model.getRooms()[0];
+      east = model.getRooms()[1];
+
       assert.deepEqual(model.exits(west), [{ door: door, room: east }]);
       assert.deepEqual(model.exits(east), [{ door: door, room: west }]);
       assert.deepEqual(model.getDoors(), [door]);
@@ -74,6 +100,10 @@ function(QUnit, MapModel) {
 
       var model = new MapModel();
       model.setRooms([east, west]);
+
+      // Reset east and west to refer to the Room objects, so equality checking works.
+      east = model.getRooms()[0];
+      west = model.getRooms()[1];
 
       assert.deepEqual(model.exits(west), [{ door: door, room: east }]);
       assert.deepEqual(model.exits(east), [{ door: door, room: west }]);
@@ -115,6 +145,15 @@ function(QUnit, MapModel) {
 
       var model = new MapModel();
       model.setRooms([north, south, east, west, centre, southeast, southwest]);
+
+      // Point our variables at the Room objects so equality works.
+      north = model.getRooms()[0];
+      south = model.getRooms()[1];
+      east = model.getRooms()[2];
+      west = model.getRooms()[3];
+      centre = model.getRooms()[4];
+      southeast = model.getRooms()[5];
+      southwest = model.getRooms()[6];
 
       assert.unorderedEqual(model.getDoors(), [westToCentre, centreToNorth,
                                               centreToWest, eastToSoutheast,
