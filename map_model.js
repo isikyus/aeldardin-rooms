@@ -105,8 +105,8 @@ function($, Room) {
 
       // Find a free ID for the new room:
       var newId = 0;
-      $.each(this.rooms, function(room) {
-        newId = Math.max(newId, room.id);
+      $.each(this.rooms, function(_index, room) {
+        newId = Math.max(newId, room.id) + 1;
       });
       var room = new Room(newId, x, y, width, height, []);
       this.rooms.push(room);
