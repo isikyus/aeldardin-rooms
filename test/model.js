@@ -54,14 +54,14 @@ function(QUnit, MapModel) {
       assert.strictEqual(walls.north.position, room.y);
       assert.strictEqual(walls.north.start, room.x);
       assert.strictEqual(walls.north.length, room.width);
-      assert.strictEqual(walls.north.runsFrom, 'east');
+      assert.strictEqual(walls.north.runsFrom, 'west');
 
       assert.strictEqual(walls.south.perpendicularAxis, 'y');
       assert.strictEqual(walls.south.parallelAxis, 'x');
       assert.strictEqual(walls.south.position, room.y + room.height);
       assert.strictEqual(walls.south.start, room.x);
       assert.strictEqual(walls.south.length, room.width);
-      assert.strictEqual(walls.south.runsFrom, 'east');
+      assert.strictEqual(walls.south.runsFrom, 'west');
 
       assert.strictEqual(walls.west.perpendicularAxis, 'x');
       assert.strictEqual(walls.west.parallelAxis, 'y');
