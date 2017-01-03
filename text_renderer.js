@@ -209,6 +209,50 @@ function($, Handlebars) {
       $container.prepend($addDoorForm);
   };
 
+  // Takes a element within a room div, finds the room key for that div, and uses it to look up the room itself.
+  // Returns the Room on success, or nul on failure.
+  var findRoomForElement = function(model, element) {
+
+    var key = $(element).closest('div.edit-room').data('room-key');
+    var matchingRooms = $.grep(model.map.getRooms(), function(room) {
+      return room.key === key;
+    });
+
+    if (matchingRooms.length === 0) {
+      console.warn('No rooms found matching key: ' + key);
+      return null;
+
+    } else {
+      if (matchingRooms.length > 1) {
+        console.warn('Found several rooms for ' + key + '; will operate on only the first.');
+        console.warn(matchingRooms);
+      }
+
+      return matchingRooms[0];
+    }
+  }
+
+  // As above, but for doors (find a door in the model for the given element, or return null if none found).
+  var findDoorForElement = function(model, element) {
+    var id = $(element).closest('li.js-door').data('door-id');
+    var matchingDoors = $.grep(model.map.getDoors(), function(door) {
+      return door.id === id;
+    });
+
+    if (matchingDoors.length === 0) {
+      console.warn('No doors found matching key: ' + id);
+      return null;
+
+    } else {
+      if (matchingDoors.length > 1) {
+        console.warn('Found several doors for ' + id + '; will operate on only the first.');
+        console.warn(matchingDoors);
+      }
+
+      return matchingDoors[0];
+    }
+  }
+
   /*
    * Adds event listeners to an element the map will be rendered into.
    * The given model instance will be updated in response to events.
@@ -217,63 +261,37 @@ function($, Handlebars) {
     var $container = $(container);
 
     $container.on('click', '.js-remove-room', function(event) {
-      var key = $(this).closest('div.edit-room').data('room-key');
-      var matchingRooms = $.grep(model.map.getRooms(), function(room) {
-        return room.key === key;
-      });
-
-      if (matchingRooms.length === 0) {
-        console.log('No rooms found matching key: ' + key);
-      } else {
-        if (matchingRooms.length > 1) {
-          console.log('Found several rooms for ' + key + '; removing only the first:');
-          console.log(matchingRooms);
-        }
-
-        model.map.removeRoom(matchingRooms[0]);
+      var room = findRoomForElement(model, this);
+      if (room !== null) {
+        model.map.removeRoom(room);
       }
     });
 
     $container.on('click', '.js-select-checkbox', function(event) {
-      var key = $(this).closest('div.edit-room').data('room-key');
-      var matchingRooms = $.grep(model.map.getRooms(), function(room) {
-        return room.key === key;
-      });
-
-      if (matchingRooms.length === 0) {
-        console.log('No rooms found matching key: ' + key);
-      } else {
-        if (matchingRooms.length > 1) {
-          console.log('Found several rooms for ' + key + '; selecting/deselecting only the first:');
-          console.log(matchingRooms);
-        }
-
+      var room = findRoomForElement(model, this);
+      if (room !== null) {
         if ($(this).is(':checked')) {
-          model.selection.select(matchingRooms[0].id);
+          model.selection.select(room.id);
         } else {
-          model.selection.deselect(matchingRooms[0].id);
+          model.selection.deselect(room.id);
         }
       }
     });
 
+    $container.on('click', '.js-add_door', function(event) {
+      var room = findRoomForElement(model, this);
+      if (room !== null) {
+        model.action.start('add_door', { room: room, x: null, y: null, direction: null});
+      }
+    });
+
     $container.on('click', '.js-select-door-checkbox', function(event) {
-      var id = $(this).closest('li.js-door').data('door-id');
-      var matchingDoors = $.grep(model.map.getDoors(), function(door) {
-        return door.id === id;
-      });
-
-      if (matchingDoors.length === 0) {
-        console.log('No doors found matching key: ' + key);
-      } else {
-        if (matchingDoors.length > 1) {
-          console.log('Found several doors for ' + key + '; selecting/deselecting only the first:');
-          console.log(matchingDoors);
-        }
-
+      var door = findDoorForElement(model, this);
+      if (door !== null) {
         if ($(this).is(':checked')) {
-          model.selection.doors.select(matchingDoors[0].id);
+          model.selection.doors.select(door.id);
         } else {
-          model.selection.doors.deselect(matchingDoors[0].id);
+          model.selection.doors.deselect(door.id);
         }
       }
     });
@@ -293,24 +311,6 @@ function($, Handlebars) {
         model.action.update(roomProperties);
       } else {
         console.warn('Tried to work on adding room when not in that state');
-      }
-    });
-
-    $container.on('click', '.js-add_door', function(event) {
-      var key = $(this).closest('div.edit-room').data('room-key');
-      var matchingRooms = $.grep(model.map.getRooms(), function(room) {
-        return room.key === key;
-      });
-
-      if (matchingRooms.length === 0) {
-        console.log('No rooms found matching key: ' + key);
-      } else {
-        if (matchingRooms.length > 1) {
-          console.log('Found several rooms for ' + key + '; removing only the first:');
-          console.log(matchingRooms);
-        }
-
-        model.action.start('add_door', { room: matchingRooms[0], x: null, y: null, direction: null});
       }
     });
 
@@ -352,9 +352,8 @@ function($, Handlebars) {
       }
     });
 
+    // Handle action submit buttons (adding rooms or doors).
     $container.on('click', 'button[data-finish-action]', function(_event) {
-
-      // Assume this is either the add-room or add-door button.
       var action = $(this).data('finish-action');
       if (model.action.action === action) {
         model.action.finish(action);
