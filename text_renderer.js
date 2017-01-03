@@ -2,111 +2,13 @@
 
 define([
     'jquery',
-    'handlebars'
+    'text_renderer/templates'
   ],
-function($, Handlebars) {
+function($, templates) {
 
   var feetPerSquare = 5;
 
-  //(function() {
-    var doorTypeNames = {
-      door      : 'door',
-      arch      : 'archway',
-      secret    : 'secret door',
-      open      : 'opening',
-      porticullis : 'porticullis'
-    };
-
-    Handlebars.default.registerHelper('displayDoorType', function(door) {
-      return doorTypeNames[door];
-    });
-  //})();
-
-  var rawRoomTemplate = "" +
-    '<div class="room" id="room_{{id}}_data">' +
-      '<h3><a id="room_{{id}}">Room {{key}}</a></h3>' +
-      '<p>' +
-        'A bare room. ' +
-        'It measures {{height}} feet north-to-south, ' +
-        'and {{width}} feet east-to-west' +
-      '</p>' +
-      '<p>' +
-        'There are {{exits.length}} exits:' +
-      '</p>' +
-      '<ol class="exits">' +
-        '{{#each exits}}' +
-          '<li id="door_{{door.id}}" class="js-door" data-door-id="{{door.id}}">' +
-            '<label>' +
-              '<input type="checkbox" id="select_door_{{door.id}}"' +
-                  ' class="js-select-door-checkbox"' +
-                  ' {{#if door.selected}}checked{{/if}} />' +
-              // TODO: this is wrong -- the door direction may need reversing if it belongs to a square in the other room.
-              'A {{displayDoorType door.style}} in the {{door.direction}} wall, ' +
-              'leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.' +
-            '</label>' +
-          '</li>' +
-        '{{/each}}' +
-      '</ol>' +
-      '<div class="edit-room" data-room-key="{{key}}">' +
-        '<p class="select-room"><label>'+
-          '<input type="checkbox" id="select_room_{{id}}" class="js-select-checkbox"' +
-            ' {{#if selected}}checked{{/if}}/>' +
-          'Select' +
-        '</label></p>' +
-        '<button class="js-remove-room">Remove</button>' +
-        '<button class="js-add_door">Add Door</button>' +
-      '</div>' +
-    '</div>'
-  var roomTemplate = Handlebars.default.compile(rawRoomTemplate);
-
-  var rawCreateTemplate = '' +
-    '<div class="edit-room" id="js-edit-room">' +
-      '<h3>New Room</h3>' +
-      '<p>' +
-        '<label for="new-room-x">X (east-west) position of north-west corner</label>' +
-        '<input type="number" id="new-room-x"/>' +
-      '</p>' +
-      '<p>' +
-        '<label for="new-room-y">Y (north-south) position of north-west corner</label>' +
-        '<input type="number" id="new-room-y"/>' +
-      '</p>' +
-      '<p>' +
-        '<label for="new-room-width">East-West size</label>' +
-        '<input type="number" id="new-room-width"/>' +
-      '</p>' +
-      '<p>' +
-        '<label for="new-room-height">North-South size</label>' +
-        '<input type="number" id="new-room-height"/>' +
-      '</p>' +
-      '<p>' +
-        '<button id="submit-add-room" data-finish-action="add_room">Add Room</button>' +
-      '</p>' +
-    '</div>'
-  //var createTemplate = Handlebars.default.compile(rawCreateTemplate);
-
-  var rawAddDoorTemplate = '' +
-    '<div class="add-door" id="js-add_door_form">' +
-      '<h3>Add Door</h3>' +
-      '<p id="js-room-for-door"></p>' +
-      '<p>' +
-        '<label for="new-door-direction">On which wall?</label>' +
-        '<select id="new-door-direction">' +
-          '<option value=""></option>' +
-          '<option value="north">North</option>' +
-          '<option value="south">South</option>' +
-          '<option value="east">East</option>' +
-          '<option value="west">West</option>' +
-        '</select>' +
-      '</p>' +
-      '<p>' +
-        '<label for="new-door-position">Where on that wall?</label>' +
-        '<select id="new-door-position" class="hide"></select>' +
-      '</p>' +
-      '<p>' +
-        '<button id="submit-add-door" data-finish-action="add_door">Add Door</button>' +
-      '</p>' +
-    '</div>'
-
+  // Preprocess data to be rendered into templates.
   var roomInfo = function(model, room) {
     return {
       key    : room.key,
@@ -126,7 +28,7 @@ function($, Handlebars) {
 
     $container.empty();
     $.each(model.map.getRooms(), function(index, room) {
-      $container.append(roomTemplate(roomInfo(model, room)));
+      $container.append(templates.room(roomInfo(model, room)));
     });
   };
 
@@ -150,7 +52,7 @@ function($, Handlebars) {
     // Use the existing edit form, if present; otherwise, add it.
     var editRoomForm = $container.find('#js-edit-room');
     if (editRoomForm.length === 0) {
-      editRoomForm = $(rawCreateTemplate);
+      editRoomForm = $(templates.create);
     }
 
     // Set X, Y, Width, and Height based on the action state.
@@ -169,7 +71,7 @@ function($, Handlebars) {
       // Insert form if necessary.
       var $addDoorForm = $container.find('#js-add_door_form');
       if ($addDoorForm.length === 0) {
-          $addDoorForm = $(rawAddDoorTemplate);
+          $addDoorForm = $(templates.addDoor);
       }
 
       // Fill in the form based on the action state.
