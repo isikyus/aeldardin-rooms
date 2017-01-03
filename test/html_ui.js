@@ -125,25 +125,30 @@ function(QUnit, MapController) {
 
       // Open the add-door form, and pick a direction.
       mapDiv.find('#room_0_data .js-add_door').click();
-      mapDiv.find('#door-direction').val('south');
+      mapDiv.find('#new-door-direction').val('south').trigger('change');
 
       // Check the available locations make sense.
       // TODO: write a separate test for door position names.
-      var positionOptions = mapDiv.find('select#door-x').find('option');
-      assert.strictEqual(positionOptions.find('[value=3]').text(), 'East corner (to nowhere)');
-      assert.strictEqual(positionOptions.last('[value=4]').text(), '5 feet from east (to nowhere)');
-      assert.strictEqual(positionOptions.last('[value=5]').text(), '5 feet from west (to Room 2)');
-      assert.strictEqual(positionOptions.last('[value=6]').text(), 'West corner (to Room 2)');
+      var $positionSelect = mapDiv.find('select#new-door-position');
+      assert.strictEqual($positionSelect.find('[value=3]').text(), '0 feet from west');
+      assert.strictEqual($positionSelect.find('[value=4]').text(), '5 feet from west');
+      assert.strictEqual($positionSelect.find('[value=5]').text(), '10 feet from west');
+      assert.strictEqual($positionSelect.find('[value=6]').text(), '15 feet from west');
 
       // Choose a location and create the door.
-      mapDiv.find('select#door-x').val(5);
+      var doorX = 5;
+      mapDiv.find('select#new-door-position').val(doorX).trigger('change');
       mapDiv.find('#submit-add-door').click();
 
       // Check the door was created correctly.
-      var newDoorDiv = mapDiv.find('#room_0_data #door_0');
-      assert.equal(newDoorDiv.length, 1, 'Should create a details block for that door');
-      assert.hasSubstring(newDoorDiv.text(), 'in the south wall', 'Should get location right');
-      assert.strictEqual(newDoorDiv.find('li a[href=#room_0]').text(), 'Room 1', 'Should get destination right');
+      assert.equal(map.getDoors().length, 1, 'Should add a door to the map');
+      assert.equal(map.getDoors()[0].x, doorX, 'Should set X coordinate correctly');
+      assert.equal(map.getDoors()[0].y, rooms[0].y + rooms[0].height - 1, 'Should set Y coordinate correctly');
+
+      var newDoorBlock = mapDiv.find('#room_0_data #door_0');
+      assert.equal(newDoorBlock.length, 1, 'Should create a details block for that door');
+      assert.hasSubstring(newDoorBlock.text(), 'in the south wall', 'Should get location right');
+      assert.strictEqual(newDoorBlock.find('a[href=#room_1]').text(), 'Room 2', 'Should get destination right');
     });
   };
   return { run : run }

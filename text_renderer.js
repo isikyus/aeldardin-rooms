@@ -54,6 +54,7 @@ function($, Handlebars) {
           'Select' +
         '</label></p>' +
         '<button class="js-remove-room">Remove</button>' +
+        '<button class="js-add_door">Add Door</button>' +
       '</div>' +
     '</div>'
   var roomTemplate = Handlebars.default.compile(rawRoomTemplate);
@@ -78,10 +79,33 @@ function($, Handlebars) {
         '<input type="number" id="new-room-height"/>' +
       '</p>' +
       '<p>' +
-        '<button id="submit-add-room">Add Room</button>' +
+        '<button id="submit-add-room" data-finish-action="add_room">Add Room</button>' +
+      '</p>' +
     '</div>'
   //var createTemplate = Handlebars.default.compile(rawCreateTemplate);
 
+  var rawAddDoorTemplate = '' +
+    '<div class="add-door" id="js-add_door_form">' +
+      '<h3>Add Door</h3>' +
+      '<p id="js-room-for-door"></p>' +
+      '<p>' +
+        '<label for="new-door-direction">On which wall?</label>' +
+        '<select id="new-door-direction">' +
+          '<option value=""></option>' +
+          '<option value="north">North</option>' +
+          '<option value="south">South</option>' +
+          '<option value="east">East</option>' +
+          '<option value="west">West</option>' +
+        '</select>' +
+      '</p>' +
+      '<p>' +
+        '<label for="new-door-position">Where on that wall?</label>' +
+        '<select id="new-door-position" class="hide"></select>' +
+      '</p>' +
+      '<p>' +
+        '<button id="submit-add-door" data-finish-action="add_door">Add Door</button>' +
+      '</p>' +
+    '</div>'
 
   var roomInfo = function(model, room) {
     return {
@@ -110,30 +134,79 @@ function($, Handlebars) {
    * Renders a form for editing the intermediate state of an action.
    */
   var renderInteraction = function(action, state, container) {
-    var $container = $(container);
 
     if (action == 'add_room') {
-      // We are creating a room.
-
-      // Use the existing edit form, if present; otherwise, add it.
-      var editRoomForm = $container.find('#js-edit-room');
-      if (editRoomForm.length == 0) {
-        editRoomForm = $(rawCreateTemplate);
-        editRoomForm.x
-      };
-
-      // Set X, Y, Width, and Height based on the action state.
-      editRoomForm.find('#new-room-x').val(state.x);
-      editRoomForm.find('#new-room-y').val(state.y);
-      editRoomForm.find('#new-room-width').val(state.width);
-      editRoomForm.find('#new-room-height').val(state.height);
-
-      // Make sure the form is visible.
-      $container.prepend(editRoomForm);
-
+      renderAddRoom(state, container);
+    } else if (action == 'add_door') {
+      renderAddDoor(state, container);
     } else {
       console.warn('unexpected action ' + action);
     };
+  };
+
+  var renderAddRoom = function(state, container) {
+    var $container = $(container);
+
+    // Use the existing edit form, if present; otherwise, add it.
+    var editRoomForm = $container.find('#js-edit-room');
+    if (editRoomForm.length == 0) {
+      editRoomForm = $(rawCreateTemplate);
+    };
+
+    // Set X, Y, Width, and Height based on the action state.
+    editRoomForm.find('#new-room-x').val(state.x);
+    editRoomForm.find('#new-room-y').val(state.y);
+    editRoomForm.find('#new-room-width').val(state.width);
+    editRoomForm.find('#new-room-height').val(state.height);
+
+    // Make sure the form is visible.
+    $container.prepend(editRoomForm);
+  };
+
+  var renderAddDoor = function(state, container) {
+    var $container = $(container);
+
+      // Insert form if necessary.
+      var $addDoorForm = $container.find('#js-add_door_form');
+      if ($addDoorForm.length === 0) {
+          $addDoorForm = $(rawAddDoorTemplate);
+      };
+
+      // Fill in the form based on the action state.
+      $addDoorForm.find('#js-room-for-door').text('(in room ' + state.room.key + ')');
+      $addDoorForm.find('#new-door-direction').val(state.direction);
+
+      // Fill in possible positions.
+      // TODO: only do this if the direction has changed.
+      var $positionSelect = $addDoorForm.find('#new-door-position')
+      $positionSelect.empty();
+
+      var wall = state.room.getWalls()[state.direction];
+      if (wall) {
+
+          for(var i = 0; i < wall.length; i++) {
+              var option = $('<option />');
+              var humanDistance = feetPerSquare * i;
+              var value = i + parseInt(wall.start, 10);
+
+              option.attr('value', value);
+
+              // Make sure the option corresponding to the proposed door position is selected.
+              if (value === state[wall.parallelAxis]) {
+                  option.attr('selected', 'selected');
+              }
+
+              // TODO: it would be nice to have more readable options, and pick the most suitable one.
+              // ("in the centre", "east corner", "5 feet from south", etc.)
+              option.text(humanDistance + ' feet from ' + wall.runsFrom);
+
+              $positionSelect.append(option);
+          }
+      } else {
+          console.warn('Unexpected door direction: ' + state.direction);
+      }
+
+      $container.prepend($addDoorForm);
   };
 
   /*
@@ -212,22 +285,81 @@ function($, Handlebars) {
 
         var $editRoomForm = $('#js-edit-room');
         var roomProperties = {
-          x : $editRoomForm.find('#new-room-x').val(),
-          y : $editRoomForm.find('#new-room-y').val(),
-          width : $editRoomForm.find('#new-room-width').val(),
-          height : $editRoomForm.find('#new-room-height').val()
+          x : parseInt($editRoomForm.find('#new-room-x').val(), 10),
+          y : parseInt($editRoomForm.find('#new-room-y').val(), 10),
+          width : parseInt($editRoomForm.find('#new-room-width').val(), 10),
+          height : parseInt($editRoomForm.find('#new-room-height').val(), 10)
         };
         model.action.update(roomProperties);
       } else {
-        console.warn('Tried to finish adding room when not in that state');
+        console.warn('Tried to work on adding room when not in that state');
       };
     });
 
-    $container.on('click', '#submit-add-room', function(_event) {
-      if (model.action.action === 'add_room') {
-        model.action.finish('add_room');
+    $container.on('click', '.js-add_door', function(event) {
+      var key = $(this).closest('div.edit-room').data('room-key');
+      var matchingRooms = $.grep(model.map.getRooms(), function(room) {
+        return room.key === key;
+      });
+
+      if (matchingRooms.length === 0) {
+        console.log('No rooms found matching key: ' + key);
       } else {
-        console.warn('Tried to finish adding room when not in that state');
+        if (matchingRooms.length > 1) {
+          console.log('Found several rooms for ' + key + '; removing only the first:');
+          console.log(matchingRooms);
+        }
+
+        model.action.start('add_door', { room: matchingRooms[0], x: null, y: null, direction: null});
+      };
+    });
+
+    // Fire update events as the add-door form changes.
+    $container.on('change', '#js-add_door_form select', function(_event) {
+
+      if (model.action.action === 'add_door') {
+
+        var $addDoorForm = $('#js-add_door_form');
+        var direction = $addDoorForm.find('#new-door-direction').val();
+        var room = model.action.actionData.room;
+
+        // TODO: need separate tests for these calculations.
+
+        var newDoorPosition = parseInt($addDoorForm.find('#new-door-position').val(), 10);
+        var newDoorX, newDoorY;
+        if (direction === 'north' || direction === 'south') {
+
+            // Make sure position is set if direction is known, since it will look set in the form.
+            newDoorX = newDoorPosition || room.x;
+            newDoorY = (direction === 'north') ? room.y : room.y + room.height - 1;
+
+        } else if (direction === 'east' || direction === 'west') {
+            newDoorX = (direction === 'west') ? room.x: room.x + room.width - 1;
+
+            // Again, make sure we set position.
+            newDoorY = newDoorPosition || room.y;
+
+        } else {
+
+            // Don't know direction yet, so we can't define the door.
+            newDoorX = null;
+            newDoorY = null;
+        }
+
+        model.action.update({room: room, direction : direction, x: newDoorX, y: newDoorY });
+      } else {
+        console.warn('Tried to work on adding door when not in that state');
+      };
+    });
+
+    $container.on('click', 'button[data-finish-action]', function(_event) {
+
+      // Assume this is either the add-room or add-door button.
+      var action = $(this).data('finish-action');
+      if (model.action.action === action) {
+        model.action.finish(action);
+      } else {
+        console.warn('Tried to finish action "' + action + '" when it was not in progress');
       };
     });
   };

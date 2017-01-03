@@ -18,37 +18,66 @@ function($, MapModel, SelectionModel, ActionModel, MapView) {
     this.view = new MapView(this.model, canvas);
 
     // When actions are completed, apply the results to the map.
-    var model = this.model;
+    installListeners(this.model);
+  };
+
+  // Install listeners to update the map when actions are completed
+  var installListeners = function(model) {
+    var map = model.map;
+
+    var finishAddingRoom = function(data) {
+      var x = data.x,
+          y = data.y,
+          width = data.width,
+          height = data.height;
+
+      // Bail out if the room would have no area.
+      if (width == 0 || height == 0) {
+        // TODO: we'd like to cancel the event, but can't, as it's already finished.
+        return;
+      };
+
+
+      // Width and height may be negative.
+      // If so, convert them so (x, y) is the top-left corner.
+      // TODO: why do I need to do so many checks here? Shouldn't the UI do things right to start with?
+      if (width < 0) {
+        width = -width;
+        x = x - width;
+      }
+      if (height < 0) {
+        height = -height;
+        y = y - height;
+      }
+
+      model.map.addRoom(x, y, width, height);
+    };
+
+    var finishAddingDoor = function(data) {
+
+      // TODO: do I want to validate anything here?
+      // TODO: should addDoor let me pass in the parent room?
+      var worked = model.map.addDoor(data.x, data.y, data.direction);
+
+      if (worked === false) {
+        // TODO: should I be using exceptions for this?
+        console.warn('Failed to add door ' + data.direction + ' at (' + data.x + ', ' + data.y + ')');
+      };
+    }
+
     model.action.addListener(function(event, action, data) {
 
       // Did we just finish doing something?
       if (event === 'finish') {
 
-        // Was it adding a room (only thing we know how to hande now?)
+        // Was it adding a room?
         if (action === 'add_room') {
+          finishAddingRoom(data);
 
-          // Width and height may be negative.
-          // If so, convert them so x, y is the top-left corner.
-          var x = data.x, y = data.y, width = data.width, height = data.height;
+        } else if (action === 'add_door') {
+          finishAddingDoor(data);
 
-          // Bail out if the room would have no area.
-          if (width == 0 || height == 0) {
-            // TODO: we'd like to cancel the event, but can't, as it's already finished.
-            return;
-          };
-
-          if (width < 0) {
-            width = -width;
-            x = x - width;
-          }
-          if (height < 0) {
-            height = -height;
-            y = y - height;
-          }
-
-          model.map.addRoom(x, y, width, height);
         } else {
-
           // We don't support whatever this is -- bail out.
           console.warn('Tried to finish unsupported action ' + action);
         }
