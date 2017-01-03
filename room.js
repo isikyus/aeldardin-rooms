@@ -25,7 +25,6 @@ function() {
     // Walls also define 'perpendicularAxis' (used for 'position'),
     // and 'parallelAxis' (used for 'start'); each one is either 'x' or 'y'.
     //
-    // TODO: should probably be a function of rooms, but I don't have objects for them yet.
     // TODO: it's more general to represent directions as unit vectors rather than names, and avoids all this case-by-case stuff.
     getWalls : function() {
       return {
