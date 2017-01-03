@@ -52,7 +52,7 @@ function($, templates) {
     // Use the existing edit form, if present; otherwise, add it.
     var editRoomForm = $container.find('#js-edit-room');
     if (editRoomForm.length === 0) {
-      editRoomForm = $(templates.create);
+      editRoomForm = $(templates.createRoom());
     }
 
     // Set X, Y, Width, and Height based on the action state.
@@ -71,7 +71,7 @@ function($, templates) {
       // Insert form if necessary.
       var $addDoorForm = $container.find('#js-add_door_form');
       if ($addDoorForm.length === 0) {
-          $addDoorForm = $(templates.addDoor);
+          $addDoorForm = $(templates.addDoor());
       }
 
       // Fill in the form based on the action state.
