@@ -2,7 +2,7 @@
 
 define([
     'jquery',
-    'handlebars',
+    'handlebars'
   ],
 function($, Handlebars) {
 
@@ -135,13 +135,13 @@ function($, Handlebars) {
    */
   var renderInteraction = function(action, state, container) {
 
-    if (action == 'add_room') {
+    if (action === 'add_room') {
       renderAddRoom(state, container);
-    } else if (action == 'add_door') {
+    } else if (action === 'add_door') {
       renderAddDoor(state, container);
     } else {
       console.warn('unexpected action ' + action);
-    };
+    }
   };
 
   var renderAddRoom = function(state, container) {
@@ -149,9 +149,9 @@ function($, Handlebars) {
 
     // Use the existing edit form, if present; otherwise, add it.
     var editRoomForm = $container.find('#js-edit-room');
-    if (editRoomForm.length == 0) {
+    if (editRoomForm.length === 0) {
       editRoomForm = $(rawCreateTemplate);
-    };
+    }
 
     // Set X, Y, Width, and Height based on the action state.
     editRoomForm.find('#new-room-x').val(state.x);
@@ -170,7 +170,7 @@ function($, Handlebars) {
       var $addDoorForm = $container.find('#js-add_door_form');
       if ($addDoorForm.length === 0) {
           $addDoorForm = $(rawAddDoorTemplate);
-      };
+      }
 
       // Fill in the form based on the action state.
       $addDoorForm.find('#js-room-for-door').text('(in room ' + state.room.key + ')');
@@ -231,7 +231,7 @@ function($, Handlebars) {
         }
 
         model.map.removeRoom(matchingRooms[0]);
-      };
+      }
     });
 
     $container.on('click', '.js-select-checkbox', function(event) {
@@ -253,7 +253,7 @@ function($, Handlebars) {
         } else {
           model.selection.deselect(matchingRooms[0].id);
         }
-      };
+      }
     });
 
     $container.on('click', '.js-select-door-checkbox', function(event) {
@@ -275,7 +275,7 @@ function($, Handlebars) {
         } else {
           model.selection.doors.deselect(matchingDoors[0].id);
         }
-      };
+      }
     });
 
     // Fire update events as the edit form contents change.
@@ -293,7 +293,7 @@ function($, Handlebars) {
         model.action.update(roomProperties);
       } else {
         console.warn('Tried to work on adding room when not in that state');
-      };
+      }
     });
 
     $container.on('click', '.js-add_door', function(event) {
@@ -311,7 +311,7 @@ function($, Handlebars) {
         }
 
         model.action.start('add_door', { room: matchingRooms[0], x: null, y: null, direction: null});
-      };
+      }
     });
 
     // Fire update events as the add-door form changes.
@@ -349,7 +349,7 @@ function($, Handlebars) {
         model.action.update({room: room, direction : direction, x: newDoorX, y: newDoorY });
       } else {
         console.warn('Tried to work on adding door when not in that state');
-      };
+      }
     });
 
     $container.on('click', 'button[data-finish-action]', function(_event) {
@@ -360,7 +360,7 @@ function($, Handlebars) {
         model.action.finish(action);
       } else {
         console.warn('Tried to finish action "' + action + '" when it was not in progress');
-      };
+      }
     });
   };
 
