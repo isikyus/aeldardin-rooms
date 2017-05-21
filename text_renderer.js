@@ -111,48 +111,37 @@ function($, templates) {
       $container.prepend($addDoorForm);
   };
 
+  // Takes a list of objects, and a field name and value to look for.
+  // Returns the one object maching that field, or reports an error
+  // if there is more than/less than one match.
+  var findByUniqueId = function(list, idField, idValue) {
+    var matches = $.grep(list, function(element) {
+      return element[idField] === idValue;
+    });
+
+    if (matches.length === 0) {
+      throw 'Nothing found matching ' + idValue + ' in ' + list;
+
+    } else {
+      if (matches.length > 1) {
+        throw 'Found several matches for ' + idValue + ' in ' + list;
+      }
+
+      return matches[0];
+    }
+  };
+
   // Takes a element within a room div, finds the room key for that div, and uses it to look up the room itself.
   // Returns the Room on success, or nul on failure.
   var findRoomForElement = function(model, element) {
-
     var key = $(element).closest('div.edit-room').data('room-key');
-    var matchingRooms = $.grep(model.map.getRooms(), function(room) {
-      return room.key === key;
-    });
-
-    if (matchingRooms.length === 0) {
-      console.warn('No rooms found matching key: ' + key);
-      return null;
-
-    } else {
-      if (matchingRooms.length > 1) {
-        console.warn('Found several rooms for ' + key + '; will operate on only the first.');
-        console.warn(matchingRooms);
-      }
-
-      return matchingRooms[0];
-    }
+    return findByUniqueId(model.map.getRooms(), 'key', key);
   }
 
   // As above, but for doors (find a door in the model for the given element, or return null if none found).
   var findDoorForElement = function(model, element) {
     var id = $(element).closest('li.js-door').data('door-id');
-    var matchingDoors = $.grep(model.map.getDoors(), function(door) {
-      return door.id === id;
-    });
-
-    if (matchingDoors.length === 0) {
-      console.warn('No doors found matching key: ' + id);
-      return null;
-
-    } else {
-      if (matchingDoors.length > 1) {
-        console.warn('Found several doors for ' + id + '; will operate on only the first.');
-        console.warn(matchingDoors);
-      }
-
-      return matchingDoors[0];
-    }
+    return findByUniqueId(model.map.getDoors(), 'id', id);
   }
 
   /*
