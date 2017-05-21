@@ -1,0 +1,21 @@
+<div class="add-door" id="js-add_door_form">
+  <h3>Add Door</h3>
+  <p id="js-room-for-door"></p>
+  <p>
+    <label for="new-door-direction">On which wall?</label>
+    <select id="new-door-direction">
+      <option value=""></option>
+      <option value="north">North</option>
+      <option value="south">South</option>
+      <option value="east">East</option>
+      <option value="west">West</option>
+    </select>
+  </p>
+  <p>
+    <label for="new-door-position">Where on that wall?</label>
+    <select id="new-door-position" class="hide"></select>
+  </p>
+  <p>
+    <button id="submit-add-door" data-finish-action="add_door">Add Door</button>
+  </p>
+</div>
