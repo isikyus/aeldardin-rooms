@@ -3,7 +3,8 @@
 require.config({
     paths: {
         'jquery': 'vendor/jquery',
-        'handlebars': 'vendor/handlebars'
+        'handlebars': 'vendor/handlebars',
+        'text': 'vendor/text'
     }
 });
 
