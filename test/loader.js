@@ -8,7 +8,8 @@ require.config({
         'QUnit': 'vendor/qunit-1.19.0',
         'jquery': 'vendor/jquery',
         'handlebars': 'vendor/handlebars',
-        'text': 'vendor/text'
+        'text': 'vendor/text',
+        'redux': 'vendor/redux'
     },
     shim: {
        'QUnit': {
@@ -17,6 +18,9 @@ require.config({
                QUnit.config.autoload = false;
                QUnit.config.autostart = false;
            }
+       },
+       'redux': {
+         exports: 'Redux'
        }
     }
 });

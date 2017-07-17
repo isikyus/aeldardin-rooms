@@ -1,11 +1,12 @@
 define([
     'jquery',
+    'redux',
     'map_model',
     'selection_model',
     'action_model',
     'map_view'
   ],
-function($, MapModel, SelectionModel, ActionModel, MapView) {
+function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
   // MVC implementation based on example at <https://alexatnet.com/articles/model-view-controller-mvc-javascript>
 
   var MapController = function(canvas) {
@@ -17,12 +18,28 @@ function($, MapModel, SelectionModel, ActionModel, MapView) {
     this.model.selection.doors = new SelectionModel();
     this.view = new MapView(this.model, canvas);
 
+
+    var appendEvent = function(history, action) {
+      if (history) {
+        history.push(action);
+        return history;
+      } else {
+        return [action];
+      }
+    }
+    var store = Redux.createStore(appendEvent);
+    store.subscribe(function() {
+      console.log(store.getState());
+    });
+    this.model.store = store;
+
     installListeners(this.model);
   };
 
   // Install listeners to update the map when actions are completed
   var installListeners = function(model) {
     var map = model.map;
+    var store = model.store;
 
     var finishAddingRoom = function(data) {
       var x = data.x,
@@ -65,6 +82,11 @@ function($, MapModel, SelectionModel, ActionModel, MapView) {
     }
 
     model.action.addListener(function(event, action, data) {
+
+      store.dispatch({
+        type: action + '-' + event,
+        data: data
+      });
 
       // Did we just finish doing something?
       if (event === 'finish') {

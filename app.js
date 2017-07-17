@@ -4,7 +4,13 @@ require.config({
     paths: {
         'jquery': 'vendor/jquery',
         'handlebars': 'vendor/handlebars',
-        'text': 'vendor/text'
+        'text': 'vendor/text',
+        'redux': 'vendor/redux'
+    },
+    shim: {
+      'redux': {
+        exports: 'Redux'
+      }
     }
 });
 
