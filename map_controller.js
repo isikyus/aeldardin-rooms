@@ -18,16 +18,7 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
     this.model.selection.doors = new SelectionModel();
     this.view = new MapView(this.model, canvas);
 
-
-    var appendEvent = function(history, action) {
-      if (history) {
-        history.push(action);
-        return history;
-      } else {
-        return [action];
-      }
-    }
-    var store = Redux.createStore(appendEvent);
+    var store = Redux.createStore(reduce);
     store.subscribe(function() {
       console.log(store.getState());
     });
@@ -35,6 +26,24 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
 
     installListeners(this.model);
   };
+
+  // Top-level Redux reducer.
+  var reduce = function(state, action) {
+
+    // Initialize state 
+    state = state || {
+      currentOperation: undefined,
+      map: undefined
+    };
+
+    // Calculate new state by having each reducer reduce its own bit.
+    return {
+      currentOperation: ActionModel.reduce(state.currentOperation, action),
+      map: MapModel.reduce(state.map, action)
+    };
+  };
+
+  // Reducer for map data
 
   // Install listeners to update the map when actions are completed
   var installListeners = function(model) {
@@ -83,20 +92,23 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
 
     model.action.addListener(function(event, action, data) {
 
-      store.dispatch({
-        type: action + '-' + event,
-        data: data
-      });
-
       // Did we just finish doing something?
       if (event === 'finish') {
 
         // Was it adding a room?
         if (action === 'add_room') {
           finishAddingRoom(data);
+          store.dispatch({
+            type: 'map.addRoom',
+            payload: data
+          });
 
         } else if (action === 'add_door') {
           finishAddingDoor(data);
+          store.dispatch({
+            type: 'map.addDoor',
+            payload: data
+          });
 
         } else {
           // We don't support whatever this is -- bail out.

@@ -57,5 +57,32 @@ function($) {
     }
   };
 
+  // Redux reducer for actions.
+  ActionModel.reduce = function(state, action) {
+
+    // Set initial state.
+    var initialState = {
+      operation: null,
+      data: {}
+    };
+    state = state || initialState;
+
+    switch (action.type) {
+      case 'operation.start':
+        return {
+          operation: action.payload.action,
+          data: action.payload.data
+        };
+
+      case 'operation.finish':
+
+      case 'operation.cancel':
+        return initialState;
+
+      default:
+        return state;
+    }
+  };
+
   return ActionModel;
 });
