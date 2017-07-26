@@ -250,5 +250,65 @@ function($, Room) {
     }
   };
 
+  // Redux reducer for map data.
+  MapModel.reduce = function(state, action) {
+
+    // Set initial state.
+    var initialState = {
+      rooms: [],
+      doors: []
+    };
+    state = state || initialState;
+
+    switch (action.type) {
+
+      case 'map.addRoom':
+        var newRoom = {
+          x: action.payload.x,
+          y: action.payload.y,
+          width: action.payload.width,
+          height: action.payload.height
+        };
+        return {
+          rooms: state.rooms.concat(newRoom),
+          doors: state.doors
+        };
+
+      case 'map.removeRooms':
+        var idsToRemove = action.payload.roomIds;
+        var roomsAfterRemoval = state.rooms.filter(function(room) {
+          return (idsToRemove.indexOf(room.id) !== 0);
+        });
+        return {
+          rooms: roomsAfterRemoval,
+          doors: state.doors
+        };
+
+      case 'map.addDoor':
+        var newDoor = {
+          x: action.payload.x,
+          y: action.payload.y,
+          direction: action.payload.direction
+        };
+        return {
+          rooms: state.rooms,
+          doors: state.doors.concat(newDoor)
+        };
+
+      case 'map.removeDoors':
+        var idsToRemove = action.payload.doorIds;
+        var doorsAfterRemoval = state.doors.filter(function(door) {
+          return (idsToRemove.indexOf(door.id) !== 0);
+        });
+        return {
+          rooms: state.rooms,
+          doors: doorsAfterRemoval
+        };
+
+      default:
+        return state;
+    }
+  };
+
   return MapModel;
 });
