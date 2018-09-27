@@ -1,9 +1,10 @@
 define([
     'jquery',
     'canvas_renderer',
-    'text_renderer'
+    'text_renderer',
+    'selection_model'
   ],
-function($, canvasRenderer, textRenderer) {
+function($, canvasRenderer, textRenderer, SelectionModel) {
 
   /*
    * Generates toolbar buttons (which apply to both the text and HTML view).
@@ -25,21 +26,21 @@ function($, canvasRenderer, textRenderer) {
     $toolbar.find('#delete_selection').on('click', function() {
 
       // TODO: it would probably be more efficient to get the list of selected rooms from the selection model.
-      var roomsToDelete = [];
-      $.each(model.map.getRooms(), function(_index, room) {
-        if (model.selection.isSelected(room.id)) {
-          roomsToDelete.push(room);
-        }
+      var state = model.store.getState()
+      var roomIdsToDelete = SelectionModel.selectedIds(state.selection, 'room');
+      var roomsToDelete = model.map.getRooms().filter(function(room) {
+        return (roomIdsToDelete.indexOf(room.id) >= 0);
       });
       $.each(roomsToDelete, function(_index, room) { model.map.removeRoom(room); });
 
-      var doorsToDelete = [];
-      $.each(model.map.getDoors(), function(_index, door) {
-        if (model.selection.doors.isSelected(door.id)) {
-          doorsToDelete.push(door);
-        }
+      var doorIdsToDelete = SelectionModel.selectedIds(state.selection, 'door');
+      var doorsToDelete = model.map.getDoors().filter(function(door) {
+        return (doorIdsToDelete.indexOf(door.id) >= 0);
       });
       $.each(doorsToDelete, function(_index, door) { model.map.removeDoor(door.id); });
+
+      // Clear selection now we've deleted everything that was in it.
+      model.store.dispatch({ type: 'selection.clear' });
     });
 
     $toolbar.find('#add_room').on('click', function() {

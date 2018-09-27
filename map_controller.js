@@ -33,13 +33,15 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
     // Initialize state 
     state = state || {
       currentOperation: undefined,
-      map: undefined
+      map: undefined,
+      selection: undefined
     };
 
     // Calculate new state by having each reducer reduce its own bit.
     return {
       currentOperation: ActionModel.reduce(state.currentOperation, action),
-      map: MapModel.reduce(state.map, action)
+      map: MapModel.reduce(state.map, action),
+      selection: SelectionModel.reduce(state.selection, action)
     };
   };
 

@@ -160,12 +160,22 @@ function($, hitRegions, symbols) {
 
       region.addListener('click', function(event) {
         var selection = model.selection;
+        var action = {
+          payload: {
+            type: 'room',
+            id: room.id
+          }
+        };
 
         if (selection.isSelected(room.id)) {
+          action.type = 'selection.deselect';
           selection.deselect(room.id);
         } else {
+          action.type = 'selection.select';
           selection.select(room.id);
         }
+
+        model.store.dispatch(action);
       });
     });
 
