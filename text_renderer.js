@@ -155,17 +155,30 @@ function($, templates) {
       var room = findRoomForElement(model, this);
       if (room !== null) {
         model.map.removeRoom(room);
+        model.store.dispatch({
+          type: 'map.removeRooms',
+          payload: room.id
+        });
       }
     });
 
     $container.on('click', '.js-select-checkbox', function(event) {
       var room = findRoomForElement(model, this);
       if (room !== null) {
+        var action = {
+          payload: {
+            type: 'room',
+            id: room.id
+          }
+        };
+
         if ($(this).is(':checked')) {
-          model.selection.select(room.id);
+          action.type = 'selection.select';
         } else {
-          model.selection.deselect(room.id);
+          action.type = 'selection.deselect';
         }
+
+        model.store.dispatch(action);
       }
     });
 
@@ -179,11 +192,20 @@ function($, templates) {
     $container.on('click', '.js-select-door-checkbox', function(event) {
       var door = findDoorForElement(model, this);
       if (door !== null) {
+        var action = {
+          payload: {
+            type: 'door',
+            id: door.id
+          }
+        };
+
         if ($(this).is(':checked')) {
-          model.selection.doors.select(door.id);
+          action.type = 'selection.select';
         } else {
-          model.selection.doors.deselect(door.id);
+          action.type = 'selection.deselect';
         }
+
+        model.store.dispatch(action);
       }
     });
 
