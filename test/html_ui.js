@@ -15,11 +15,19 @@ function(QUnit, MapController) {
 
       // Create a simple three-room map.
       var rooms = [
-        { id: 0, x: 0, y: 0, width: 3, height: 2, wallFeatures: [] },
-        { id: 1, x: 0, y: 2, width: 3, height: 2, wallFeatures: [] },
-        { id: 2, x: 3, y: 0, width: 2, height: 4, wallFeatures: [] },
+        { id: 0, x: 0, y: 0, width: 3, height: 2 },
+        { id: 1, x: 0, y: 2, width: 3, height: 2 },
+        { id: 2, x: 3, y: 0, width: 2, height: 4 },
       ];
-      controller.model.map.setRooms(rooms);
+
+      // TODO: probably there's an easier way to load a known state.
+      rooms.forEach(function(room) {
+        controller.model.store.dispatch({
+          type: 'map.addRoom',
+          payload: room
+        });
+      });
+
 
       // Select two rooms, and delete them once they are selected.
       var selectRooms = function() {
@@ -45,16 +53,36 @@ function(QUnit, MapController) {
 
       // Create a simple map.
       var rooms = [
-        { id: 0, x: 0, y: 0, width: 3, height: 2, wallFeatures: [] },
-        { id: 1, x: 0, y: 2, width: 3, height: 2, wallFeatures: [] },
-        { id: 2, x: 3, y: 0, width: 2, height: 4, wallFeatures: [] },
+        { id: 0, x: 0, y: 0, width: 3, height: 2 },
+        { id: 1, x: 0, y: 2, width: 3, height: 2 },
+        { id: 2, x: 3, y: 0, width: 2, height: 4 },
       ];
-      map.setRooms(rooms);
+
+      // TODO: probably there's an easier way to load a known state.
+      rooms.forEach(function(room) {
+        controller.model.store.dispatch({
+          type: 'map.addRoom',
+          payload: room
+        });
+      });
 
       // Add some doors.
-      var southDoorId = map.addDoor(0, 1, 'south');
-      var northDoorId = map.addDoor(2, 2, 'north');
-      var eastDoorId = map.addDoor(2, 2, 'east');
+      var addDoor = function(model, x, y, direction) {
+        model.store.dispatch({
+          type: 'map.addDoor',
+          payload: {
+            x: x,
+            y: y,
+            direction: direction
+          }
+        });
+
+        var doors = model.store.getState().map.doors;
+        return doors[doors.length - 1].id;
+      };
+      var southDoorId = addDoor(controller.model, 0, 1, 'south');
+      var northDoorId = addDoor(controller.model, 2, 2, 'north');
+      var eastDoorId = addDoor(controller.model, 2, 2, 'east');
 
       // Select two of those doors, and delete them.
       mapDiv.find('#select_door_' + southDoorId).click();
@@ -77,8 +105,6 @@ function(QUnit, MapController) {
       // TODO: extract to helper
       var mapDiv = $('#test-map');
       var controller = new MapController(mapDiv.find('canvas')[0]);
-
-      controller.model.map.setRooms([]);
 
       // Fill in the form to create a new room.
       var defineNewRoom = function() {
@@ -118,10 +144,17 @@ function(QUnit, MapController) {
 
       // Create a simple map.
       var rooms = [
-        { id: 0, x: 3, y: 0, width: 4, height: 2, wallFeatures: [] },
-        { id: 1, x: 5, y: 2, width: 2, height: 2, wallFeatures: [] },
+        { id: 0, x: 3, y: 0, width: 4, height: 2, },
+        { id: 1, x: 5, y: 2, width: 2, height: 2 },
       ];
-      map.setRooms(rooms);
+
+      // TODO: probably there's an easier way to load a known state.
+      rooms.forEach(function(room) {
+        controller.model.store.dispatch({
+          type: 'map.addRoom',
+          payload: room
+        });
+      });
 
       // Open the add-door form, and pick a direction.
       mapDiv.find('#room_0_data .js-add_door').click();
@@ -141,9 +174,10 @@ function(QUnit, MapController) {
       mapDiv.find('#submit-add-door').click();
 
       // Check the door was created correctly.
-      assert.equal(map.getDoors().length, 1, 'Should add a door to the map');
-      assert.equal(map.getDoors()[0].x, doorX, 'Should set X coordinate correctly');
-      assert.equal(map.getDoors()[0].y, rooms[0].y + rooms[0].height - 1, 'Should set Y coordinate correctly');
+      map = controller.model.store.getState().map;
+      assert.equal(map.doors.length, 1, 'Should add a door to the map');
+      assert.equal(map.doors[0].x, doorX, 'Should set X coordinate correctly');
+      assert.equal(map.doors[0].y, rooms[0].y + rooms[0].height - 1, 'Should set Y coordinate correctly');
 
       var newDoorBlock = mapDiv.find('#room_0_data #door_0');
       assert.equal(newDoorBlock.length, 1, 'Should create a details block for that door');

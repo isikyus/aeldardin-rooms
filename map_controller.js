@@ -11,18 +11,18 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
 
   var MapController = function(canvas) {
     this.model = {
-      map: new MapModel([]),
-      selection : new SelectionModel(),
-      action : new ActionModel()
+//       map: new MapModel([]),
+//       selection : new SelectionModel(),
+      action : new ActionModel(),
+      store : Redux.createStore(reduce)
     };
-    this.model.selection.doors = new SelectionModel();
+//     this.model.selection.doors = new SelectionModel();
     this.view = new MapView(this.model, canvas);
 
-    var store = Redux.createStore(reduce);
+    var store = this.model.store;
     store.subscribe(function() {
       console.log(store.getState());
     });
-    this.model.store = store;
 
     installListeners(this.model);
   };
@@ -99,15 +99,15 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
 
         // Was it adding a room?
         if (action === 'add_room') {
-          finishAddingRoom(data);
-          store.dispatch({
+//           finishAddingRoom(data);
+          model.store.dispatch({
             type: 'map.addRoom',
             payload: data
           });
 
         } else if (action === 'add_door') {
-          finishAddingDoor(data);
-          store.dispatch({
+//           finishAddingDoor(data);
+          model.store.dispatch({
             type: 'map.addDoor',
             payload: data
           });

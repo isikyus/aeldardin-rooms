@@ -2,10 +2,11 @@
 
 define([
     'jquery',
+    'selection_model',
     'hit_regions',
     'symbols'
   ],
-function($, hitRegions, symbols) {
+function($, SelectionModel, hitRegions, symbols) {
 
   // TODO: extract so tests can use it.
   var scale = 50;
@@ -120,16 +121,17 @@ function($, hitRegions, symbols) {
   var render = function(model, context) {
     clearCanvas(context)
 
-    $.each(model.map.getRooms(), function(_index, room) {
+    $.each(model.store.getState().map.rooms, function(_index, room) {
       drawRoom(room, context, model.map);
 
-      if (model.selection.isSelected(room.id)) {
+      // TODO: will be duplicated; extract
+      if (SelectionModel.selectedIds(model.store.getState().selection, 'room').includes(room.id)) {
         drawSelectionBox(room, context);
       };
+    });
 
-      $.each(room['wallFeatures'], function(_index, feature) {
-        drawWallFeature(feature, context);
-      });
+    $.each(model.store.getState().map.doors, function(_index, feature) {
+      drawWallFeature(feature, context);
     });
   };
 
@@ -155,11 +157,11 @@ function($, hitRegions, symbols) {
     var regions = hitRegions(canvas);
 
     regions.reset();
-    $.each(model.map.getRooms(), function(_index, room) {
+    $.each(model.store.getState().map.rooms, function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
 
       region.addListener('click', function(event) {
-        var selection = model.selection;
+        var selection = model.store.getState().selection;
         var action = {
           payload: {
             type: 'room',
@@ -167,12 +169,11 @@ function($, hitRegions, symbols) {
           }
         };
 
-        if (selection.isSelected(room.id)) {
+        // TODO: will be duplicated; extract
+        if (SelectionModel.selectedIds(selection, 'room').includes(room.id)) {
           action.type = 'selection.deselect';
-          selection.deselect(room.id);
         } else {
           action.type = 'selection.select';
-          selection.select(room.id);
         }
 
         model.store.dispatch(action);

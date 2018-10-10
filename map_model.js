@@ -11,31 +11,6 @@ function($, Room) {
     this.roomListeners = [];
   }
 
-  // Check if the door lines up with an edge of the room.
-  var connectsTo = function(door, room) {
-    var door_x = door.x, door_y = door.y;
-    var x1 = room.x, x2 = room.x + room.width;
-    var y1 = room.y, y2 = room.y + room.height;
-
-    if (door.direction === 'east') { door_x += 1; }
-    if (door.direction === 'south') { door_y += 1; }
-
-    switch(door.direction) {
-      case 'east':
-      case 'west':
-        return (door_x === x1 || door_x === x2) && y1 <= door_y && door_y < y2;
-        // No fall-through, as return ends execution.
-
-      case 'north':
-      case 'south':
-        return (door_y === y1 || door_y === y2) && x1 <= door_x && door_x < x2;
-        // Again, return ends execution.
-
-      default:
-        throw 'Unexpected door direction' + door.direction;
-    }
-  };
-
   var exit = function(door, toRoom) {
     return {
       door : door,
@@ -65,31 +40,6 @@ function($, Room) {
         });
 
         return doors;
-    },
-    exits    : function(room) {
-      var exits = [];
-
-      $.each(this.rooms, function(_index, otherRoom) {
-        // Every door in this room will connect to this room,
-        // but that doesn't count as an exit from the room to itself.
-        if (otherRoom == room) return;
-
-        // Find exits from this room to the other room.
-        $.each(room.wallFeatures, function(_index2, door) {
-          if (connectsTo(door, otherRoom)) {
-            exits.push(exit(door, otherRoom));
-          }
-        });
-
-        // Exits from the other room to this one.
-        $.each(otherRoom.wallFeatures, function(_index2, door) {
-          if (connectsTo(door, room)) {
-            exits.push(exit(door, otherRoom));
-          }
-        });
-      });
-
-      return exits;
     },
     getRooms : function() { return this.rooms; },
     setRooms : function(rooms) {
@@ -250,6 +200,16 @@ function($, Room) {
     }
   };
 
+  var nextId = function(thingsWithIds) {
+    var existingIds = thingsWithIds.map(function(thing) {
+      return thing.id;
+    });
+
+    // Ensure we always start with at least ID 0 (avoids starting at -Infinity).
+    var maxId = Math.max.apply(Math, existingIds.concat(-1));
+    return maxId + 1;
+  };
+
   // Redux reducer for map data.
   MapModel.reduce = function(state, action) {
 
@@ -264,11 +224,24 @@ function($, Room) {
 
       case 'map.addRoom':
         var newRoom = {
+          id: nextId(state.rooms),
           x: action.payload.x,
           y: action.payload.y,
           width: action.payload.width,
           height: action.payload.height
         };
+// TODO: fix keys.
+
+        // Normalise width and height to be non-negative.
+        if(newRoom.width < 0) {
+          newRoom.x = newRoom.x + newRoom.width;
+          newRoom.width = -newRoom.width;
+        }
+        if(newRoom.height < 0) {
+          newRoom.y = newRoom.y + newRoom.height;
+          newRoom.height = -newRoom.height;
+        }
+
         return {
           rooms: state.rooms.concat(newRoom),
           doors: state.doors
@@ -277,7 +250,7 @@ function($, Room) {
       case 'map.removeRooms':
         var idsToRemove = action.payload.roomIds;
         var roomsAfterRemoval = state.rooms.filter(function(room) {
-          return (idsToRemove.indexOf(room.id) !== 0);
+          return (idsToRemove.indexOf(room.id) < 0);
         });
         return {
           rooms: roomsAfterRemoval,
@@ -286,6 +259,7 @@ function($, Room) {
 
       case 'map.addDoor':
         var newDoor = {
+          id: nextId(state.doors),
           x: action.payload.x,
           y: action.payload.y,
           direction: action.payload.direction
@@ -298,7 +272,7 @@ function($, Room) {
       case 'map.removeDoors':
         var idsToRemove = action.payload.doorIds;
         var doorsAfterRemoval = state.doors.filter(function(door) {
-          return (idsToRemove.indexOf(door.id) !== 0);
+          return (idsToRemove.indexOf(door.id) >= 0);
         });
         return {
           rooms: state.rooms,
@@ -309,6 +283,59 @@ function($, Room) {
         return state;
     }
   };
+
+  // Check if the door lines up with an edge of the given room.
+  var connectsTo = function(door, room) {
+    var door_x = door.x, door_y = door.y;
+    var x1 = room.x, x2 = room.x + room.width;
+    var y1 = room.y, y2 = room.y + room.height;
+
+    if (door.direction === 'east') { door_x += 1; }
+    if (door.direction === 'south') { door_y += 1; }
+
+    switch(door.direction) {
+      case 'east':
+      case 'west':
+        return (door_x === x1 || door_x === x2) && y1 <= door_y && door_y < y2;
+        // No fall-through, as return ends execution.
+
+      case 'north':
+      case 'south':
+        return (door_y === y1 || door_y === y2) && x1 <= door_x && door_x < x2;
+        // Again, return ends execution.
+
+      default:
+        throw 'Unexpected door direction' + door.direction;
+    }
+  };
+
+  // A map of all exits (doors from one room to another).
+  var exits = function(map) {
+      var exits = {};
+
+      $.each(map.rooms, function(_index, room) {
+        exits[room.id] = [];
+
+        $.each(map.rooms, function(_index, otherRoom) {
+          // TODO: only need to loop over a triangular subarray to get every pair.
+          // Every door in this room will connect to this room,
+          // but that doesn't count as an exit from the room to itself.
+          if (otherRoom == room) return;
+
+          // Find doors connecting these two rooms.
+          $.each(map.doors, function(_index2, door) {
+            if (connectsTo(door, room) &&
+                connectsTo(door, otherRoom)) {
+              exits[room.id].push({ door: door, room: otherRoom});
+            }
+          });
+        });
+      });
+
+      return exits;
+  }
+
+  MapModel.exits = exits;
 
   return MapModel;
 });
