@@ -26,18 +26,18 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
     $toolbar.find('#delete_selection').on('click', function() {
 
       // TODO: it would probably be more efficient to get the list of selected rooms from the selection model.
-      var state = model.store.getState()
+      var state = model.store.getState();
       var roomIdsToDelete = SelectionModel.selectedIds(state.selection, 'room');
-      var roomsToDelete = model.map.getRooms().filter(function(room) {
-        return (roomIdsToDelete.indexOf(room.id) >= 0);
+      model.store.dispatch({
+        type: 'map.removeRooms',
+        payload: { roomIds: roomIdsToDelete }
       });
-      $.each(roomsToDelete, function(_index, room) { model.map.removeRoom(room); });
 
       var doorIdsToDelete = SelectionModel.selectedIds(state.selection, 'door');
-      var doorsToDelete = model.map.getDoors().filter(function(door) {
-        return (doorIdsToDelete.indexOf(door.id) >= 0);
+      model.store.dispatch({
+        type: 'map.removeDoors',
+        payload: { doorIds: doorIdsToDelete }
       });
-      $.each(doorsToDelete, function(_index, door) { model.map.removeDoor(door.id); });
 
       // Clear selection now we've deleted everything that was in it.
       model.store.dispatch({ type: 'selection.clear' });
@@ -65,12 +65,9 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
       canvasRenderer.render(model, graphicsContext);
       textRenderer.render(model, textContext);
       canvasRenderer.addListeners(canvas, model);
-    };
+    }
 
-    model.map.addRoomsListener(function(_map) {
-      render(model);
-    });
-    model.selection.addListener(function(_map) {
+    model.store.subscribe(function() {
       render(model);
     });
     model.action.addListener(function(event, action, state) {
@@ -79,8 +76,8 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
       render(model);
 
       if (event === 'start' || event === 'update') {
-        canvasRenderer.renderInteraction(action, state, graphicsContext);
-        textRenderer.renderInteraction(action, state, textContext);
+        canvasRenderer.renderInteraction(model, action, state, graphicsContext);
+        textRenderer.renderInteraction(model, action, state, textContext);
 
       } else if (event !== 'finish' && event !== 'cancel') {
         console.warn('Unexpected event type (not start, update, finish, or cancel):');

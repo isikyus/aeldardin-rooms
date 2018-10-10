@@ -2,9 +2,12 @@
 
 define([
     'jquery',
+    'map_model',
+    'room',
+    'selection_model',
     'text_renderer/templates'
   ],
-function($, templates) {
+function($, MapModel, Room, SelectionModel, templates) {
 
   var feetPerSquare = 5;
 
@@ -13,10 +16,10 @@ function($, templates) {
     return {
       key    : room.key,
       id     : room.id,
-      exits  : model.map.exits(room),
+      exits  : MapModel.exits(model.store.getState().map)[room.id],
       height : room.height * feetPerSquare,
       width  : room.width * feetPerSquare,
-      selected : model.selection.isSelected(room.id)
+      selected : SelectionModel.selectedIds(model.store.getState().selection, 'room').includes(room.id)
     }
   }
 
@@ -27,7 +30,7 @@ function($, templates) {
     var $container = $(container);
 
     $container.empty();
-    $.each(model.map.getRooms(), function(index, room) {
+    $.each(model.store.getState().map.rooms, function(index, room) {
       $container.append(templates.room(roomInfo(model, room)));
     });
   };
@@ -35,18 +38,18 @@ function($, templates) {
   /*
    * Renders a form for editing the intermediate state of an action.
    */
-  var renderInteraction = function(action, state, container) {
+  var renderInteraction = function(model, action, state, container) {
 
     if (action === 'add_room') {
-      renderAddRoom(state, container);
+      renderAddRoom(model, state, container);
     } else if (action === 'add_door') {
-      renderAddDoor(state, container);
+      renderAddDoor(model, state, container);
     } else {
       console.warn('unexpected action ' + action);
     }
   };
 
-  var renderAddRoom = function(state, container) {
+  var renderAddRoom = function(model, state, container) {
     var $container = $(container);
 
     // Use the existing edit form, if present; otherwise, add it.
@@ -65,7 +68,7 @@ function($, templates) {
     $container.prepend(editRoomForm);
   };
 
-  var renderAddDoor = function(state, container) {
+  var renderAddDoor = function(model, state, container) {
     var $container = $(container);
 
       // Insert form if necessary.
@@ -83,7 +86,9 @@ function($, templates) {
       var $positionSelect = $addDoorForm.find('#new-door-position')
       $positionSelect.empty();
 
-      var wall = state.room.getWalls()[state.direction];
+      // Load the current version of the room data.
+      var room = findByUniqueId(model.store.getState().map.rooms, 'id', state.room.id);
+      var wall = Room.walls(room)[state.direction];
       if (wall) {
 
           for(var i = 0; i < wall.length; i++) {
@@ -134,14 +139,14 @@ function($, templates) {
   // Takes a element within a room div, finds the room key for that div, and uses it to look up the room itself.
   // Returns the Room on success, or nul on failure.
   var findRoomForElement = function(model, element) {
-    var key = $(element).closest('div.edit-room').data('room-key');
-    return findByUniqueId(model.map.getRooms(), 'key', key);
+    var id = $(element).closest('div.edit-room').data('room-id');
+    return findByUniqueId(model.store.getState().map.rooms, 'id', id);
   }
 
   // As above, but for doors (find a door in the model for the given element, or return null if none found).
   var findDoorForElement = function(model, element) {
     var id = $(element).closest('li.js-door').data('door-id');
-    return findByUniqueId(model.map.getDoors(), 'id', id);
+    return findByUniqueId(model.store.getState().map.rooms, 'id', id);
   }
 
   /*

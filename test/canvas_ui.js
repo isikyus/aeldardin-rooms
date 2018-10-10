@@ -20,11 +20,16 @@ function(QUnit, MapController, hitRegions) {
 
       // Create a simple three-room map.
       var rooms = [
-        { id: 0, x: 0, y: 0, width: 3, height: 2, wallFeatures: [] },
-        { id: 1, x: 0, y: 2, width: 3, height: 2, wallFeatures: [] },
-        { id: 2, x: 3, y: 0, width: 2, height: 4, wallFeatures: [] },
+        { id: 0, x: 0, y: 0, width: 3, height: 2 },
+        { id: 1, x: 0, y: 2, width: 3, height: 2 },
+        { id: 2, x: 3, y: 0, width: 2, height: 4 },
       ];
-      controller.model.map.setRooms(rooms);
+      rooms.forEach(function(room) {
+        controller.model.store.dispatch({
+          type: 'map.addRoom',
+          payload: room
+        });
+      });
 
       var regions = hitRegions(mapDiv.find('canvas'));
 
@@ -80,7 +85,7 @@ function(QUnit, MapController, hitRegions) {
       createInexactRoom();
       createRoomMovingLeftAndUp();
 
-      var rooms = controller.model.map.getRooms();
+      var rooms = controller.model.store.getState().map.rooms;
       assert.equal(rooms[0].x, 1);
       assert.equal(rooms[0].y, 1);
       assert.equal(rooms[0].width, 1);
@@ -112,7 +117,7 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mouseleave', 0, 0);
       assert.equal(action.actionData, null);
 
-      assert.deepEqual(controller.model.map.getRooms(), []);
+      assert.deepEqual(controller.model.store.getState().map.rooms, []);
     });
 
     test('cancelling a room by not making it big enough', function(assert) {
@@ -136,7 +141,7 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mouseup', 1 * scale, 3 * scale);
       assert.equal(action.actionData, null);
 
-      assert.deepEqual(controller.model.map.getRooms(), []);
+      assert.deepEqual(controller.model.store.getState().map.rooms, []);
     });
   };
   return { run : run }
