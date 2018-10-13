@@ -230,7 +230,8 @@ function($, Room) {
           width: action.payload.width,
           height: action.payload.height
         };
-// TODO: fix keys.
+
+        newRoom.key = action.payload.key || (newRoom.id + 1);
 
         // Normalise width and height to be non-negative.
         if(newRoom.width < 0) {
