@@ -127,7 +127,6 @@ function(QUnit, MapController) {
 
       var newRoomDiv = mapDiv.find('.room').first();
       assert.equal(newRoomDiv.length, 1, 'Should create a details block for that room');
-      assert.equal(newRoomDiv.find('.edit-room').data('room-key'), 1, 'gives the new room a key of 1');
 
       // One square is five feet; the code works in squares, but the user sees text in feet.
       assert.hasSubstring(newRoomDiv.text(), '25 feet east-to-west', 'includes correct width');

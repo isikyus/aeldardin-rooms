@@ -168,17 +168,6 @@ function($, MapModel, Room, SelectionModel, templates) {
   var addListeners = function(container, model) {
     var $container = $(container);
 
-    $container.on('click', '.js-remove-room', function(event) {
-      var room = findRoomForElement(model, this);
-      if (room !== null) {
-        model.map.removeRoom(room);
-        model.store.dispatch({
-          type: 'map.removeRooms',
-          payload: room.id
-        });
-      }
-    });
-
     $container.on('click', '.js-select-checkbox', function(event) {
       var room = findRoomForElement(model, this);
       if (room !== null) {
