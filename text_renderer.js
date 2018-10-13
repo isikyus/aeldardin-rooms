@@ -30,8 +30,6 @@ function($, MapModel, Room, SelectionModel, templates) {
     exits.forEach(function(exit) {
       exit.selected = SelectionModel.selectedIds(state.selection, 'door').includes(exit.door.id);
     });
-
-    console.log(exits);
     return exits;
   };
 
