@@ -16,8 +16,10 @@
               class="js-select-door-checkbox"
               {{#if selected}}checked{{/if}} />
           <!-- TODO: this is wrong -- the door direction may need reversing if it belongs to a square in the other room. -->
-          A {{displayDoorType door.style}} in the {{door.direction}} wall,
-          leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.
+          A {{displayDoorType door.style}} in the {{door.direction}} wall.
+          {{#if room}}
+            It leads to <a href="#room_{{room.id}}">Room {{room.key}}</a>.
+          {{/if}}
         </label>
       </li>
     {{/each}}

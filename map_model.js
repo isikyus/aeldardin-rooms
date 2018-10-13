@@ -314,22 +314,31 @@ function($, Room) {
   var exits = function(map) {
       var exits = {};
 
-      $.each(map.rooms, function(_index, room) {
+      map.rooms.forEach(function(room) {
         exits[room.id] = [];
 
-        $.each(map.rooms, function(_index, otherRoom) {
-          // TODO: only need to loop over a triangular subarray to get every pair.
-          // Every door in this room will connect to this room,
-          // but that doesn't count as an exit from the room to itself.
-          if (otherRoom == room) return;
+        // Find doors connected to this room.
+        map.doors.forEach(function(door) {
+          if (connectsTo(door, room)) {
+            var exit = { door: door, room: null };
 
-          // Find doors connecting these two rooms.
-          $.each(map.doors, function(_index2, door) {
-            if (connectsTo(door, room) &&
-                connectsTo(door, otherRoom)) {
-              exits[room.id].push({ door: door, room: otherRoom});
-            }
-          });
+            // Add a connection to another room if applicable.
+            map.rooms.forEach(function(otherRoom) {
+
+              // TODO: only need to loop over a triangular subarray to get every pair.
+              // Every door in this room will connect to this room,
+              // but that doesn't count as an exit from the room to itself.
+              if (otherRoom == room) return;
+
+              // Find doors connecting these two rooms.
+              // TODO: won't work if there are multiple possible connections.
+              if (connectsTo(door, otherRoom)) {
+                exit.room = otherRoom;
+              }
+            });
+console.log(exit);
+            exits[room.id].push(exit);
+          };
         });
       });
 
