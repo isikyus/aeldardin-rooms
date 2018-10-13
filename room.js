@@ -1,17 +1,6 @@
 define([],
 function() {
 
-  // Room model -- just for storing and viewing room data.
-  var Room = function(id, x, y, width, height, wallFeatures) {
-    this.id = id;
-    this.key = id + 1;
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.wallFeatures = wallFeatures || [];
-  };
-
   // Return an object representing the walls of this room.
   // Its keys are 'north', 'south', 'east', and 'west'.
   //
@@ -25,7 +14,7 @@ function() {
   //
   // TODO: it's more general to represent directions as unit vectors rather than names, and avoids all this case-by-case stuff.
 
-  Room.walls = function(room) {
+  walls = function(room) {
     return {
       north : {
         parallelAxis: 'x',
@@ -62,5 +51,7 @@ function() {
     };
   };
 
-  return Room;
+  return {
+    walls: walls
+  };
 });

@@ -1,48 +1,7 @@
-define([
-  'jquery'
-],
-function($) {
-  // Simple selection model -- basically a set that supports event listeners.
+define([],
+function() {
 
-  var SelectionModel = function() {
-    this.store = {};
-    this.listeners = [];
-  };
-
-  SelectionModel.prototype = {
-    select : function(item) {
-      if (item in this.store) {
-        return false;
-      } else {
-        this.store[item] = true;
-        this.fireChanged();
-        return true;
-      }
-    },
-    deselect : function(item) {
-      if (item in this.store) {
-        delete this.store[item];
-        this.fireChanged();
-        return true;
-      } else {
-        return false;
-      }
-    },
-    isSelected : function(item) {
-      return item in this.store;
-    },
-    addListener : function (listener) {
-      this.listeners.push(listener);
-    },
-    fireChanged : function() {
-      var self = this;
-      $.each(this.listeners, function(_index, listener) {
-        listener(self);
-      });
-    }
-  };
-
-  SelectionModel.reduce = function(state, action) {
+  var reduce = function(state, action) {
 
     // Array of "selection" objects, each of which holds
     // the type and ID of the thing selected.
@@ -80,7 +39,7 @@ function($) {
    * Extract the selected IDs of the given type of object
    * from the Redux selection state.
    */
-  SelectionModel.selectedIds = function(state, type) {
+  var selectedIds = function(state, type) {
     return state.filter(function(selection) {
       return selection.objectType == type;
     }).map(function(selection) {
@@ -88,5 +47,8 @@ function($) {
     });
   };
 
-  return SelectionModel;
+  return {
+    selectedIds: selectedIds,
+    reduce: reduce
+  };
 });
