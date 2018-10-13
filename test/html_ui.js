@@ -136,6 +136,35 @@ function(QUnit, MapController) {
 
     QUnit.module('HTML UI -- Adding doors');
 
+    test('adding a door not connected to anything', function(assert) {
+      var mapDiv = $('#test-map');
+      var controller = new MapController(mapDiv.find('canvas')[0]);
+      var map = controller.model.map;
+
+      controller.model.store.dispatch({
+          type: 'map.addRoom',
+          payload: { id: 0, x: 0, y: 0, width: 1, height: 1, }
+      });
+
+      // Open the add-door form, and pick a direction.
+      mapDiv.find('#room_0_data .js-add_door').click();
+      mapDiv.find('#new-door-direction').val('north').trigger('change');
+
+      // Choose a location and create the door.
+      mapDiv.find('select#new-door-position').val(0).trigger('change');
+      mapDiv.find('#submit-add-door').click();
+
+      // Check the door was created correctly.
+      map = controller.model.store.getState().map;
+      assert.equal(map.doors.length, 1, 'Should add a door to the map');
+      assert.equal(map.doors[0].x, 0, 'Should set X coordinate correctly');
+      assert.equal(map.doors[0].y, 0, 'Should set Y coordinate correctly');
+
+      var newDoorBlock = mapDiv.find('#room_0_data #door_0');
+      assert.equal(newDoorBlock.length, 1, 'Should create a details block for that door');
+      assert.hasSubstring(newDoorBlock.text(), 'in the north wall.', 'Should get location right');
+    });
+
     test('adding a door joining two rooms', function(assert) {
       var mapDiv = $('#test-map');
       var controller = new MapController(mapDiv.find('canvas')[0]);
