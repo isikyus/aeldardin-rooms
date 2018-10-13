@@ -13,15 +13,27 @@ function($, MapModel, Room, SelectionModel, templates) {
 
   // Preprocess data to be rendered into templates.
   var roomInfo = function(model, room) {
+    var state = model.store.getState();
     return {
       key    : room.key,
       id     : room.id,
-      exits  : MapModel.exits(model.store.getState().map)[room.id],
+      exits  : exitInfo(state, room),
       height : room.height * feetPerSquare,
       width  : room.width * feetPerSquare,
-      selected : SelectionModel.selectedIds(model.store.getState().selection, 'room').includes(room.id)
+      selected : SelectionModel.selectedIds(state.selection, 'room').includes(room.id)
     }
   }
+
+  var exitInfo = function(state, room) {
+    var exits = MapModel.exits(state.map)[room.id];
+
+    exits.forEach(function(exit) {
+      exit.selected = SelectionModel.selectedIds(state.selection, 'door').includes(exit.door.id);
+    });
+
+    console.log(exits);
+    return exits;
+  };
 
   /*
    * Renders the map as a list of text room descriptions.

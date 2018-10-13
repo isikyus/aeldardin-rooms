@@ -272,7 +272,7 @@ function($, Room) {
       case 'map.removeDoors':
         var idsToRemove = action.payload.doorIds;
         var doorsAfterRemoval = state.doors.filter(function(door) {
-          return (idsToRemove.indexOf(door.id) >= 0);
+          return (idsToRemove.indexOf(door.id) < 0);
         });
         return {
           rooms: state.rooms,
