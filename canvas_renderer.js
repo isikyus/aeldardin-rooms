@@ -140,8 +140,9 @@ function($, SelectionModel, hitRegions, symbols) {
    * (e.g. a room being created).
    * render() should be called first to get rid of any existing partial state.
    */
-  var renderInteraction = function(action, state, context) {
+  var renderInteraction = function(_model, action, state, context) {
 
+    console.log('action', action, 'state', state);
     if (action == 'add_room') {
       context.save();
       context.strokeStyle = 'red';
