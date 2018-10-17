@@ -66,6 +66,9 @@ function() {
           y: action.payload.y,
           direction: action.payload.direction
         };
+
+        newDoor.style = action.payload.style || 'door';
+
         return {
           rooms: state.rooms,
           doors: state.doors.concat(newDoor)
