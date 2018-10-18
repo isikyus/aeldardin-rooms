@@ -153,12 +153,6 @@ function($, MapModel, Room, SelectionModel, templates) {
     return findByUniqueId(model.store.getState().map.rooms, 'id', id);
   }
 
-  // As above, but for doors (find a door in the model for the given element, or return null if none found).
-  var findDoorForElement = function(model, element) {
-    var id = $(element).closest('li.js-door').data('door-id');
-    return findByUniqueId(model.store.getState().map.rooms, 'id', id);
-  }
-
   /*
    * Adds event listeners to an element the map will be rendered into.
    * The given model instance will be updated in response to events.
@@ -167,49 +161,24 @@ function($, MapModel, Room, SelectionModel, templates) {
     var $container = $(container);
 
     $container.on('click', '.js-select-checkbox', function(event) {
-      var room = findRoomForElement(model, this);
-      if (room !== null) {
-        var action = {
-          payload: {
-            type: 'room',
-            id: room.id
-          }
-        };
+      var $checkbox = $(this),
+          objectType = $checkbox.data('select-type'),
+          objectId = $checkbox.data('select-id'),
+          actionType = $checkbox.is(':checked') ? 'selection.deselect' : 'selection.select';
 
-        if ($(this).is(':checked')) {
-          action.type = 'selection.select';
-        } else {
-          action.type = 'selection.deselect';
+      model.store.dispatch({
+        type: actionType,
+        payload: {
+          type: objectType,
+          id: id
         }
-
-        model.store.dispatch(action);
-      }
+      });
     });
 
     $container.on('click', '.js-add_door', function(event) {
       var room = findRoomForElement(model, this);
       if (room !== null) {
         model.action.start('add_door', { room: room, x: null, y: null, direction: null});
-      }
-    });
-
-    $container.on('click', '.js-select-door-checkbox', function(event) {
-      var door = findDoorForElement(model, this);
-      if (door !== null) {
-        var action = {
-          payload: {
-            type: 'door',
-            id: door.id
-          }
-        };
-
-        if ($(this).is(':checked')) {
-          action.type = 'selection.select';
-        } else {
-          action.type = 'selection.deselect';
-        }
-
-        model.store.dispatch(action);
       }
     });
 
