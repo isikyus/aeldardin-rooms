@@ -20,13 +20,13 @@ function(QUnit, MapModel, Room) {
 
       roomData.forEach(function(room) {
         map = MapModel.reduce(map, {
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
 
       var result = MapModel.reduce(map, {
-        type: 'map.removeRooms',
+        type: 'map.rooms.remove',
         payload: {
           roomIds: [1]
         }
@@ -46,12 +46,12 @@ function(QUnit, MapModel, Room) {
 
     test("removing a room that doesn't exist", function(assert) {
       var map = MapModel.reduce(undefined, {
-        type: 'map.addRoom',
+        type: 'map.rooms.add',
         payload: {id: 0, key: 1, x: 10, y: 5, width: 4, height: 2}
       });
 
       var result = MapModel.reduce(map, {
-        type: 'map.removeRooms',
+        type: 'map.rooms.remove',
         payload: {
           roomIds: [1]
         }
@@ -80,13 +80,13 @@ function(QUnit, MapModel, Room) {
 
       roomData.forEach(function(room) {
         map = MapModel.reduce(map, {
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
 
       var result = MapModel.reduce(map, {
-        type: 'map.addDoor',
+        type: 'map.doors.add',
         payload: { x: 11, y: 7, direction: 'north' }
       });
 
@@ -109,7 +109,7 @@ function(QUnit, MapModel, Room) {
 
       roomData.forEach(function(room) {
         map = MapModel.reduce(map, {
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
@@ -123,7 +123,7 @@ function(QUnit, MapModel, Room) {
       ]
       doorData.forEach(function(door) {
         map = MapModel.reduce(map, {
-          type: 'map.addDoor',
+          type: 'map.doors.add',
           payload: door
         });
       });
@@ -150,13 +150,13 @@ function(QUnit, MapModel, Room) {
 
       roomData.forEach(function(room) {
         map = MapModel.reduce(map, {
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
 
       var result = MapModel.reduce(map, {
-        type: 'map.addDoor',
+        type: 'map.doors.add',
         payload: {
           x: 5,
           y: 7,
@@ -184,7 +184,7 @@ function(QUnit, MapModel, Room) {
       };
 
       var result = MapModel.reduce(map, {
-        type: "map.removeDoors",
+        type: 'map.doors.remove',
         payload: {
           doorIds: [doorId]
         }
@@ -205,7 +205,7 @@ function(QUnit, MapModel, Room) {
       };
 
       var result = MapModel.reduce(map, {
-        type: "map.removeDoors",
+        type: 'map.doors.remove',
         payload: {
           doorIds: [doorId + 1]
         }

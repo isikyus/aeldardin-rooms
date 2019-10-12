@@ -23,7 +23,7 @@ function(QUnit, MapController) {
       // TODO: probably there's an easier way to load a known state.
       rooms.forEach(function(room) {
         controller.model.store.dispatch({
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
@@ -61,7 +61,7 @@ function(QUnit, MapController) {
       // TODO: probably there's an easier way to load a known state.
       rooms.forEach(function(room) {
         controller.model.store.dispatch({
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
@@ -69,7 +69,7 @@ function(QUnit, MapController) {
       // Add some doors.
       var addDoor = function(model, x, y, direction) {
         model.store.dispatch({
-          type: 'map.addDoor',
+          type: 'map.doors.add',
           payload: {
             x: x,
             y: y,
@@ -142,7 +142,7 @@ function(QUnit, MapController) {
       var map = controller.model.map;
 
       controller.model.store.dispatch({
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: { id: 0, x: 0, y: 0, width: 1, height: 1, }
       });
 
@@ -179,7 +179,7 @@ function(QUnit, MapController) {
       // TODO: probably there's an easier way to load a known state.
       rooms.forEach(function(room) {
         controller.model.store.dispatch({
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
