@@ -21,7 +21,7 @@ function(QUnit, Redux, MapModel, Room) {
 
       roomData.forEach(function(room) {
         map = MapModel.reduce(map, {
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
@@ -51,7 +51,7 @@ function(QUnit, Redux, MapModel, Room) {
 
       roomData.forEach(function(room) {
         map = MapModel.reduce(map, {
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });

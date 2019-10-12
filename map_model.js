@@ -23,7 +23,7 @@ function() {
 
     switch (action.type) {
 
-      case 'map.addRoom':
+      case 'map.rooms.add':
         var newRoom = {
           id: nextId(state.rooms),
           x: action.payload.x,
@@ -49,7 +49,7 @@ function() {
           doors: state.doors
         };
 
-      case 'map.removeRooms':
+      case 'map.rooms.remove':
         var idsToRemove = action.payload.roomIds;
         var roomsAfterRemoval = state.rooms.filter(function(room) {
           return (idsToRemove.indexOf(room.id) < 0);
@@ -59,7 +59,7 @@ function() {
           doors: state.doors
         };
 
-      case 'map.addDoor':
+      case 'map.doors.add':
         var newDoor = {
           id: nextId(state.doors),
           x: action.payload.x,
@@ -74,7 +74,7 @@ function() {
           doors: state.doors.concat(newDoor)
         };
 
-      case 'map.removeDoors':
+      case 'map.doors.remove':
         var idsToRemove = action.payload.doorIds;
         var doorsAfterRemoval = state.doors.filter(function(door) {
           return (idsToRemove.indexOf(door.id) < 0);

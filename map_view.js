@@ -29,13 +29,13 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
       var state = model.store.getState();
       var roomIdsToDelete = SelectionModel.selectedIds(state.selection, 'room');
       model.store.dispatch({
-        type: 'map.removeRooms',
+        type: 'map.rooms.remove',
         payload: { roomIds: roomIdsToDelete }
       });
 
       var doorIdsToDelete = SelectionModel.selectedIds(state.selection, 'door');
       model.store.dispatch({
-        type: 'map.removeDoors',
+        type: 'map.doors.remove',
         payload: { doorIds: doorIdsToDelete }
       });
 

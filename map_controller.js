@@ -62,13 +62,13 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
             return;
           };
           model.store.dispatch({
-            type: 'map.addRoom',
+            type: 'map.rooms.add',
             payload: data
           });
 
         } else if (action === 'add_door') {
           model.store.dispatch({
-            type: 'map.addDoor',
+            type: 'map.doors.add',
             payload: data
           });
 

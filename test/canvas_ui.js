@@ -26,7 +26,7 @@ function(QUnit, MapController, hitRegions) {
       ];
       rooms.forEach(function(room) {
         controller.model.store.dispatch({
-          type: 'map.addRoom',
+          type: 'map.rooms.add',
           payload: room
         });
       });
