@@ -164,13 +164,13 @@ function($, MapModel, Room, SelectionModel, templates) {
       var $checkbox = $(this),
           objectType = $checkbox.data('select-type'),
           objectId = $checkbox.data('select-id'),
-          actionType = $checkbox.is(':checked') ? 'selection.deselect' : 'selection.select';
+          actionType = $checkbox.is(':checked') ? 'selection.select' : 'selection.deselect';
 
       model.store.dispatch({
         type: actionType,
         payload: {
           type: objectType,
-          id: id
+          id: objectId
         }
       });
     });

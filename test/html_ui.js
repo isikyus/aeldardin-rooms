@@ -31,8 +31,8 @@ function(QUnit, MapController) {
 
       // Select two rooms, and delete them once they are selected.
       var selectRooms = function() {
-        mapDiv.find('#select_room_0').click();
-        mapDiv.find('#select_room_2').click();
+        mapDiv.find('#room_0_data .select-room input').click();
+        mapDiv.find('#room_2_data .select-room input').click();
       };
       var deleteRooms = function() {
         mapDiv.find('#delete_selection').click();
@@ -85,8 +85,8 @@ function(QUnit, MapController) {
       var eastDoorId = addDoor(controller.model, 2, 2, 'east');
 
       // Select two of those doors, and delete them.
-      mapDiv.find('#select_door_' + southDoorId).click();
-      mapDiv.find('#select_door_' + eastDoorId).click();
+      mapDiv.find('#door_' + southDoorId + ' input').click();
+      mapDiv.find('#door_' + eastDoorId + ' input').click();
       mapDiv.find('#delete_selection').click();
 
       // Confirm that only the third door remains.
