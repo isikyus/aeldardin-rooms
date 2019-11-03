@@ -57,31 +57,56 @@ function($) {
     }
   };
 
-  // Redux reducer for actions.
-  ActionModel.reduce = function(state, action) {
+  // Build a reducer that stores the intermediate state of the action
+  // separately from the main "finished" state managed by the main
+  // reducer.
+  ActionModel.wrapReducer = function(baseReducer) {
+    return function(state, action) {
 
-    // Set initial state.
-    var initialState = {
-      operation: null,
-      data: {}
+      // Set initial state
+      state = state || {
+        state: null,
+        pending: {
+          action: null,
+          state: null
+        }
+      };
+
+      switch(action.type) {
+        case 'action.start':
+          return {
+            state: state.state,
+            pending: {
+              action: action.payload.action,
+              state: state.state
+            }
+          };
+
+        case 'action.update':
+          return {
+            state: state.state,
+            pending: {
+              action: state.pending.action,
+              state: baseReducer(state.pending.state, action.payload)
+            }
+          };
+
+        case 'action.finish':
+          return {
+            state: state.pending.state,
+            pending: {
+              action: null,
+              state: null
+            }
+          };
+
+        default:
+          return {
+            state: baseReducer(state.state, action),
+            pending: state.pending
+          };
+      }
     };
-    state = state || initialState;
-
-    switch (action.type) {
-      case 'operation.start':
-        return {
-          operation: action.payload.action,
-          data: action.payload.data
-        };
-
-      case 'operation.finish':
-
-      case 'operation.cancel':
-        return initialState;
-
-      default:
-        return state;
-    }
   };
 
   return ActionModel;
