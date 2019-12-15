@@ -77,7 +77,7 @@ function(QUnit, MapController) {
           }
         });
 
-        var doors = model.store.getState().map.doors;
+        var doors = model.store.getState().map.state.doors;
         return doors[doors.length - 1].id;
       };
       var southDoorId = addDoor(controller.model, 0, 1, 'south');
@@ -155,7 +155,7 @@ function(QUnit, MapController) {
       mapDiv.find('#submit-add-door').click();
 
       // Check the door was created correctly.
-      map = controller.model.store.getState().map;
+      map = controller.model.store.getState().map.state;
       assert.equal(map.doors.length, 1, 'Should add a door to the map');
       assert.equal(map.doors[0].x, 0, 'Should set X coordinate correctly');
       assert.equal(map.doors[0].y, 0, 'Should set Y coordinate correctly');
@@ -202,7 +202,7 @@ function(QUnit, MapController) {
       mapDiv.find('#submit-add-door').click();
 
       // Check the door was created correctly.
-      map = controller.model.store.getState().map;
+      map = controller.model.store.getState().map.state;
       assert.equal(map.doors.length, 1, 'Should add a door to the map');
       assert.equal(map.doors[0].x, doorX, 'Should set X coordinate correctly');
       assert.equal(map.doors[0].y, rooms[0].y + rooms[0].height - 1, 'Should set Y coordinate correctly');

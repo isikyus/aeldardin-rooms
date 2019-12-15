@@ -25,7 +25,7 @@ function($, MapModel, Room, SelectionModel, templates) {
   }
 
   var exitInfo = function(state, room) {
-    var exits = MapModel.exits(state.map)[room.id];
+    var exits = MapModel.exits(state.map.state)[room.id];
 
     exits.forEach(function(exit) {
       exit.selected = SelectionModel.selectedIds(state.selection, 'door').includes(exit.door.id);
@@ -40,7 +40,8 @@ function($, MapModel, Room, SelectionModel, templates) {
     var $container = $(container);
 
     $container.empty();
-    $.each(model.store.getState().map.rooms, function(index, room) {
+    var map = model.store.getState().map.state;
+    $.each(map.rooms, function(index, room) {
       $container.append(templates.room(roomInfo(model, room)));
     });
   };
@@ -53,7 +54,8 @@ function($, MapModel, Room, SelectionModel, templates) {
     if (action === 'add_room') {
       renderAddRoom(model, state, container);
     } else if (action === 'add_door') {
-      renderAddDoor(model, state, container);
+      // TODO: should pass in map.pending.state for this particular action
+      renderAddDoor(model.store.getState().map.state, state, container);
     } else {
       console.warn('unexpected action ' + action);
     }
@@ -78,7 +80,7 @@ function($, MapModel, Room, SelectionModel, templates) {
     $container.prepend(editRoomForm);
   };
 
-  var renderAddDoor = function(model, state, container) {
+  var renderAddDoor = function(map, state, container) {
     var $container = $(container);
 
       // Insert form if necessary.
@@ -97,7 +99,7 @@ function($, MapModel, Room, SelectionModel, templates) {
       $positionSelect.empty();
 
       // Load the current version of the room data.
-      var room = findByUniqueId(model.store.getState().map.rooms, 'id', state.room.id);
+      var room = findByUniqueId(map.rooms, 'id', state.room.id);
       var wall = Room.walls(room)[state.direction];
       if (wall) {
 
@@ -148,9 +150,9 @@ function($, MapModel, Room, SelectionModel, templates) {
 
   // Takes a element within a room div, finds the room key for that div, and uses it to look up the room itself.
   // Returns the Room on success, or nul on failure.
-  var findRoomForElement = function(model, element) {
+  var findRoomForElement = function(map, element) {
     var id = $(element).closest('div.edit-room').data('room-id');
-    return findByUniqueId(model.store.getState().map.rooms, 'id', id);
+    return findByUniqueId(map.rooms, 'id', id);
   }
 
   /*
@@ -176,7 +178,7 @@ function($, MapModel, Room, SelectionModel, templates) {
     });
 
     $container.on('click', '.js-add_door', function(event) {
-      var room = findRoomForElement(model, this);
+      var room = findRoomForElement(model.store.getState().map.state, this);
       if (room !== null) {
         model.action.start('add_door', { room: room, x: null, y: null, direction: null});
       }
