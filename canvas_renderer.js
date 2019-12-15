@@ -121,7 +121,8 @@ function($, SelectionModel, hitRegions, symbols) {
   var render = function(model, context) {
     clearCanvas(context)
 
-    $.each(model.store.getState().map.rooms, function(_index, room) {
+    var map = model.store.getState().map.state;
+    $.each(map.rooms, function(_index, room) {
       drawRoom(room, context, model.map);
 
       // TODO: will be duplicated; extract
@@ -130,7 +131,7 @@ function($, SelectionModel, hitRegions, symbols) {
       };
     });
 
-    $.each(model.store.getState().map.doors, function(_index, feature) {
+    $.each(map.doors, function(_index, feature) {
       drawWallFeature(feature, context);
     });
   };
@@ -158,7 +159,8 @@ function($, SelectionModel, hitRegions, symbols) {
     var regions = hitRegions(canvas);
 
     regions.reset();
-    $.each(model.store.getState().map.rooms, function(_index, room) {
+    var map = model.store.getState().map.state;
+    $.each(map.rooms, function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
 
       region.addListener('click', function(event) {

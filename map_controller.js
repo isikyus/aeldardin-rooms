@@ -36,13 +36,10 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
 
     // Calculate new state by having each reducer reduce its own bit.
     return {
-      currentOperation: ActionModel.reduce(state.currentOperation, action),
-      map: MapModel.reduce(state.map, action),
+      map: ActionModel.wrapReducer(MapModel.reduce)(state.map, action),
       selection: SelectionModel.reduce(state.selection, action)
     };
   };
-
-  // Reducer for map data
 
   // Install listeners to update the map when actions are completed
   var installListeners = function(model) {

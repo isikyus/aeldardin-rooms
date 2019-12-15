@@ -85,7 +85,7 @@ function(QUnit, MapController, hitRegions) {
       createInexactRoom();
       createRoomMovingLeftAndUp();
 
-      var rooms = controller.model.store.getState().map.rooms;
+      var rooms = controller.model.store.getState().map.state.rooms;
       assert.equal(rooms[0].x, 1);
       assert.equal(rooms[0].y, 1);
       assert.equal(rooms[0].width, 1);
@@ -117,7 +117,7 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mouseleave', 0, 0);
       assert.equal(action.actionData, null);
 
-      assert.deepEqual(controller.model.store.getState().map.rooms, []);
+      assert.deepEqual(controller.model.store.getState().map.state.rooms, []);
     });
 
     test('cancelling a room by not making it big enough', function(assert) {
@@ -141,7 +141,7 @@ function(QUnit, MapController, hitRegions) {
       regions._fire('mouseup', 1 * scale, 3 * scale);
       assert.equal(action.actionData, null);
 
-      assert.deepEqual(controller.model.store.getState().map.rooms, []);
+      assert.deepEqual(controller.model.store.getState().map.state.rooms, []);
     });
   };
   return { run : run }
