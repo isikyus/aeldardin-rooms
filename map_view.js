@@ -45,7 +45,18 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
 
     $toolbar.find('#add_room').on('click', function() {
 
-      model.action.start('add_room', { x : 0, y : 0, width: 1, height: 1 });
+      model.store.dispatch({
+        type: 'action.stage',
+        payload: {
+          type: 'map.rooms.add',
+          payload: {
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1
+          }
+        }
+      });
     });
   };
 
@@ -69,20 +80,6 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
 
     model.store.subscribe(function() {
       render(model);
-    });
-    model.action.addListener(function(event, action, state) {
-
-      // Re-draw the model to erase any existing partial state.
-      render(model);
-
-      if (event === 'start' || event === 'update') {
-        canvasRenderer.renderInteraction(model, action, state, graphicsContext);
-        textRenderer.renderInteraction(model, action, state, textContext);
-
-      } else if (event !== 'finish' && event !== 'cancel') {
-        console.warn('Unexpected event type (not start, update, finish, or cancel):');
-        console.warn([event, action, state]);
-      };
     });
 
     render(model);

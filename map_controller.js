@@ -11,7 +11,6 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
 
   var MapController = function(canvas) {
     this.model = {
-      action : new ActionModel(),
       store : Redux.createStore(reduce)
     };
     this.view = new MapView(this.model, canvas);
@@ -20,8 +19,6 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
     store.subscribe(function() {
       console.log(store.getState());
     });
-
-    installListeners(this.model);
   };
 
   // Top-level Redux reducer.
@@ -39,42 +36,6 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
       map: ActionModel.wrapReducer(MapModel.reduce)(state.map, action),
       selection: SelectionModel.reduce(state.selection, action)
     };
-  };
-
-  // Install listeners to update the map when actions are completed
-  var installListeners = function(model) {
-    var store = model.store;
-
-    model.action.addListener(function(event, action, data) {
-
-      // Did we just finish doing something?
-      if (event === 'finish') {
-
-        // Was it adding a room?
-        if (action === 'add_room') {
-
-          // Bail out if the room would have no area.
-          if (data.width == 0 || data.height == 0) {
-            // TODO: we'd like to cancel the event, but can't, as it's already finished.
-            return;
-          };
-          model.store.dispatch({
-            type: 'map.rooms.add',
-            payload: data
-          });
-
-        } else if (action === 'add_door') {
-          model.store.dispatch({
-            type: 'map.doors.add',
-            payload: data
-          });
-
-        } else {
-          // We don't support whatever this is -- bail out.
-          console.warn('Tried to finish unsupported action ' + action);
-        }
-      }
-    });
   };
 
   // TODO: need to update this to work with Redux.
