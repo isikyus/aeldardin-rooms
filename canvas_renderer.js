@@ -121,19 +121,23 @@ function($, SelectionModel, hitRegions, symbols) {
   var render = function(model, context) {
     clearCanvas(context)
 
-    var map = model.store.getState().map.state;
-    $.each(map.rooms, function(_index, room) {
+    var state = model.store.getState();
+    $.each(state.map.state.rooms, function(_index, room) {
       drawRoom(room, context, model.map);
 
       // TODO: will be duplicated; extract
-      if (SelectionModel.selectedIds(model.store.getState().selection, 'room').includes(room.id)) {
+      if (SelectionModel.selectedIds(state.selection, 'room').includes(room.id)) {
         drawSelectionBox(room, context);
       };
     });
 
-    $.each(map.doors, function(_index, feature) {
+    $.each(state.map.state.doors, function(_index, feature) {
       drawWallFeature(feature, context);
     });
+
+    if (state.map.pending.action) {
+      renderInteraction(state.map.pending.action, context);
+    }
   };
 
   /*
@@ -141,13 +145,17 @@ function($, SelectionModel, hitRegions, symbols) {
    * (e.g. a room being created).
    * render() should be called first to get rid of any existing partial state.
    */
-  var renderInteraction = function(_model, action, state, context) {
+  var renderInteraction = function(action, context) {
 
-    console.log('action', action, 'state', state);
-    if (action == 'add_room') {
+    if (action.type == 'map.rooms.add') {
       context.save();
       context.strokeStyle = 'red';
-      context.strokeRect(state.x * scale, state.y * scale, state.width * scale, state.height * scale);
+      context.strokeRect(
+        action.payload.x * scale,
+        action.payload.y * scale,
+        action.payload.width * scale,
+        action.payload.height * scale
+      );
       context.restore();
     };
   };
@@ -183,13 +191,18 @@ function($, SelectionModel, hitRegions, symbols) {
       });
     });
 
-    var action = model.action;
     regions.getFallback().addListener('mousedown', function(event) {
-      action.start('add_room', {
-        x : event.x / scale,
-        y : event.y / scale,
-        width: 0,
-        height: 0
+      model.store.dispatch({
+        type: 'action.stage',
+        payload: {
+          type: 'map.rooms.add',
+          payload: {
+            x : event.x / scale,
+            y : event.y / scale,
+            width: 0,
+            height: 0
+          }
+        }
       });
     });
 
@@ -199,40 +212,46 @@ function($, SelectionModel, hitRegions, symbols) {
      *
      * Leaves the top-left corner unchanged, so the user can drag around it.
      * This means width and height can go negative, which will have to be corrected for later.
-     *
-     * Assumes the current action is 'add_room'
+     * TODO: might be better to remember which way we're dragging.
      */
-    var updateAddRoomAction = function(action, newX, newY) {
-        var roomOriginX = Math.round(action.actionData.x);
-        var roomOriginY = Math.round(action.actionData.y);
+    var updateAddRoomAction = function(model, newX, newY) {
+      var currentAction = model.store.getState().map.pending.action;
+
+      if (currentAction.type != 'map.rooms.add') {
+        throw 'Unexpected action ' + currentAction.type + ' when dragging';
+      } else {
+        var roomOriginX = Math.round(currentAction.payload.x);
+        var roomOriginY = Math.round(currentAction.payload.y);
         var newCornerX = Math.round(newX / scale);
         var newCornerY = Math.round(newY / scale);
 
-        action.update({
-          x : roomOriginX,
-          y : roomOriginY,
-          width: newCornerX - roomOriginX,
-          height: newCornerY - roomOriginY
+        model.store.dispatch({
+          type: 'action.stage',
+          payload: {
+            type: 'map.rooms.add',
+            payload: {
+              x : roomOriginX,
+              y : roomOriginY,
+              width: newCornerX - roomOriginX,
+              height: newCornerY - roomOriginY
+            }
+          }
         });
+      }
     }
 
     regions.getFallback().addListener('mousemove', function(event) {
-      if (action.action == 'add_room') {
-        updateAddRoomAction(action, event.x, event.y);
-      }
+      updateAddRoomAction(model, event.x, event.y);
     });
 
     regions.getFallback().addListener('mouseup', function(event) {
-      if (action.action == 'add_room') {
-        updateAddRoomAction(action, event.x, event.y);
-        action.finish();
-      }
+      updateAddRoomAction(model, event.x, event.y);
+      model.store.dispatch({ type: 'action.finish' });
     });
 
     regions.getFallback().addListener('mouseleave', function(event) {
-      if (action.action == 'add_room') {
-        action.cancel();
-      }
+      // TODO: can't cancel action yet, so rely on next user action being something else.
+      //model.store.dispatch({ type: 'action.finish' });
     });
   };
 
