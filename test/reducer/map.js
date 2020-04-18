@@ -4,10 +4,10 @@
 define([
   'QUnit',
   'redux',
-  'map_model',
+  'reducer/map',
   'room'
 ],
-function(QUnit, Redux, MapModel, Room) {
+function(QUnit, Redux, Map, Room) {
   var run = function() {
 
     // TODO: probably no longer necessary.
@@ -20,7 +20,7 @@ function(QUnit, Redux, MapModel, Room) {
       var map = undefined;
 
       roomData.forEach(function(room) {
-        map = MapModel.reduce(map, {
+        map = Map.reduce(map, {
           type: 'map.rooms.add',
           payload: room
         });
@@ -50,7 +50,7 @@ function(QUnit, Redux, MapModel, Room) {
       var map = undefined;
 
       roomData.forEach(function(room) {
-        map = MapModel.reduce(map, {
+        map = Map.reduce(map, {
           type: 'map.rooms.add',
           payload: room
         });
@@ -93,15 +93,6 @@ function(QUnit, Redux, MapModel, Room) {
       assert.strictEqual(walls.east.runsFrom, 'north');
     });
 
-//     test('adding doors', function(assert) {
-//       assert.fail('Not yet tested');
-//       
-//       assert.unorderedEqual(model.getDoors(), [westToCentre, centreToNorth,
-//                                               centreToWest, eastToSoutheast,
-//                                               eastToCentre, southToCentre],
-//                                               'Includes all defined doors');
-//     });
-
     QUnit.module('Exits');
     test('south', function(assert) {
 
@@ -113,7 +104,7 @@ function(QUnit, Redux, MapModel, Room) {
         doors: [door]
       };
 
-      var exits = MapModel.exits(map);
+      var exits = Map.exits(map);
       assert.deepEqual(exits[north.id], [{ door: door, room: south }]);
       assert.deepEqual(exits[south.id], [{ door: door, room: north }]);
     });
@@ -127,7 +118,7 @@ function(QUnit, Redux, MapModel, Room) {
         doors: [door]
       };
 
-      var exits = MapModel.exits(map);
+      var exits = Map.exits(map);
       assert.deepEqual(exits[north.id], [{ door: door, room: south }]);
       assert.deepEqual(exits[south.id], [{ door: door, room: north }]);
     });
@@ -141,7 +132,7 @@ function(QUnit, Redux, MapModel, Room) {
         doors: [door]
       };
 
-      var exits = MapModel.exits(map);
+      var exits = Map.exits(map);
       assert.deepEqual(exits[east.id], [{ door: door, room: west }]);
       assert.deepEqual(exits[west.id], [{ door: door, room: east }]);
     });
@@ -155,7 +146,7 @@ function(QUnit, Redux, MapModel, Room) {
         doors: [door]
       };
 
-      var exits = MapModel.exits(map);
+      var exits = Map.exits(map);
       assert.deepEqual(exits[east.id], [{ door: door, room: west }]);
       assert.deepEqual(exits[west.id], [{ door: door, room: east }]);
     });
@@ -197,7 +188,7 @@ function(QUnit, Redux, MapModel, Room) {
         doors: [westToCentre, centreToNorth, centreToWest, eastToSoutheast, eastToCentre, southToCentre]
       };
 
-      var exits = MapModel.exits(map);
+      var exits = Map.exits(map);
 
       assert.unorderedEqual(exits[centre.id], [
         { door: centreToNorth, room: north },

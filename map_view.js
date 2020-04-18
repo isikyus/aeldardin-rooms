@@ -2,9 +2,9 @@ define([
     'jquery',
     'canvas_renderer',
     'text_renderer',
-    'selection_model'
+    'reducer/selection'
   ],
-function($, canvasRenderer, textRenderer, SelectionModel) {
+function($, canvasRenderer, textRenderer, Selection) {
 
   /*
    * Generates toolbar buttons (which apply to both the text and HTML view).
@@ -22,30 +22,29 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
    *
    *@param $toolbar The toolbar div, as a jQuery object (hence the $).
    */
-  var addToolbarListeners = function($toolbar, model) {
+  var addToolbarListeners = function($toolbar, store) {
     $toolbar.find('#delete_selection').on('click', function() {
 
-      // TODO: it would probably be more efficient to get the list of selected rooms from the selection model.
-      var state = model.store.getState();
-      var roomIdsToDelete = SelectionModel.selectedIds(state.selection, 'room');
-      model.store.dispatch({
+      var state = store.getState();
+      var roomIdsToDelete = Selection.selectedIds(state.selection, 'room');
+      store.dispatch({
         type: 'map.rooms.remove',
         payload: { roomIds: roomIdsToDelete }
       });
 
-      var doorIdsToDelete = SelectionModel.selectedIds(state.selection, 'door');
-      model.store.dispatch({
+      var doorIdsToDelete = Selection.selectedIds(state.selection, 'door');
+      store.dispatch({
         type: 'map.doors.remove',
         payload: { doorIds: doorIdsToDelete }
       });
 
       // Clear selection now we've deleted everything that was in it.
-      model.store.dispatch({ type: 'selection.clear' });
+      store.dispatch({ type: 'selection.clear' });
     });
 
     $toolbar.find('#add_room').on('click', function() {
 
-      model.store.dispatch({
+      store.dispatch({
         type: 'action.stage',
         payload: {
           type: 'map.rooms.add',
@@ -62,27 +61,27 @@ function($, canvasRenderer, textRenderer, SelectionModel) {
 
   // MVC implementation based on example from <https://alexatnet.com/articles/model-view-controller-mvc-javascript>
 
-  var MapView = function(model, canvas) {
+  var MapView = function(store, canvas) {
     var graphicsContext = canvas.getContext('2d');
     var toolbar = buildToolbar();
     var textContext = $('<div>');
     $(canvas).before(toolbar);
     $(canvas).after(textContext);
 
-    addToolbarListeners(toolbar, model);
-    textRenderer.addListeners(textContext, model);
+    addToolbarListeners(toolbar, store);
+    textRenderer.addListeners(textContext, store);
 
-    var render = function(model) {
-      canvasRenderer.render(model, graphicsContext);
-      textRenderer.render(model, textContext);
-      canvasRenderer.addListeners(canvas, model);
+    var render = function(store) {
+      canvasRenderer.render(store, graphicsContext);
+      textRenderer.render(store, textContext);
+      canvasRenderer.addListeners(canvas, store);
     }
 
-    model.store.subscribe(function() {
-      render(model);
+    store.subscribe(function() {
+      render(store);
     });
 
-    render(model);
+    render(store);
   };
 
   return MapView;

@@ -1,11 +1,11 @@
-// Tests for the "action model".
+// Tests for the action reducer (for state of half-completed changes).
 
 "use strict";
 define([
   'QUnit',
-  'action_model'
+  'reducer/action'
 ],
-function(QUnit, ActionModel) {
+function(QUnit, Action) {
   var run = function() {
 
     QUnit.module('Actions generally');
@@ -15,7 +15,7 @@ function(QUnit, ActionModel) {
         return s || 'initial';
       }
 
-      var reducer = ActionModel.wrapReducer(baseReducer);
+      var reducer = Action.wrapReducer(baseReducer);
       var state = reducer(null, 'NO-OP')
 
       assert.strictEqual(state.state, 'initial', 'Newly created models have initial state of inner reducer');
@@ -25,7 +25,7 @@ function(QUnit, ActionModel) {
       }, 'Newly created models come without action data');
     });
 
-    test('passes action through to child reducer if it does not affect the model', function(assert) {
+    test('passes action through to child reducer if it is not addressed to us', function(assert) {
       var initialState = {
         state: {
           word: 'test'
@@ -46,7 +46,7 @@ function(QUnit, ActionModel) {
         };
       };
 
-      var reducer = ActionModel.wrapReducer(baseReducer);
+      var reducer = Action.wrapReducer(baseReducer);
       var state = reducer(initialState, {type: 'base.append', payload: '+Z'});
 
       assert.strictEqual(state.state.word, 'test+Z');
@@ -63,7 +63,7 @@ function(QUnit, ActionModel) {
         action: null,
         state: null
       };
-      var existingModel = {
+      var existing = {
         state: oldState,
         pending: pending
       };
@@ -85,10 +85,10 @@ function(QUnit, ActionModel) {
           word: state.word + action.payload
         };
       };
-      var model = ActionModel.wrapReducer(baseReducer)(existingModel, change);
+      var reducer = Action.wrapReducer(baseReducer)(existing, change);
 
-      assert.strictEqual(model.pending.action, change.payload);
-      assert.strictEqual(model.pending.state.word, 'value+Z');
+      assert.strictEqual(reducer.pending.action, change.payload);
+      assert.strictEqual(reducer.pending.state.word, 'value+Z');
     });
 
     QUnit.module('Finishing actions');
@@ -97,7 +97,7 @@ function(QUnit, ActionModel) {
       var pendingAction = 'word.edit';
       var oldState = { word : 'value' };
 
-      var existingModel = {
+      var existing = {
         state: oldState,
         pending: {
           action: {
@@ -110,18 +110,18 @@ function(QUnit, ActionModel) {
 
       var change = { type: 'action.finish' };
 
-      var model = ActionModel.wrapReducer((s, a) => s)(existingModel, change);
+      var reducer = Action.wrapReducer((s, a) => s)(existing, change);
 
-      assert.strictEqual(model.pending.action, null);
-      assert.strictEqual(model.pending.state, null);
-      assert.strictEqual(model.state.word, 'newValue');
+      assert.strictEqual(reducer.pending.action, null);
+      assert.strictEqual(reducer.pending.state, null);
+      assert.strictEqual(reducer.state.word, 'newValue');
     });
 
     test('action.cancel forgets pending updates', function(assert) {
       var pendingAction = 'word.edit';
       var oldState = { word : 'value' };
 
-      var existingModel = {
+      var existing = {
         state: oldState,
         pending: {
           action: {
@@ -134,11 +134,11 @@ function(QUnit, ActionModel) {
 
       var change = { type: 'action.cancel' };
 
-      var model = ActionModel.wrapReducer((s, a) => s)(existingModel, change);
+      var reducer = Action.wrapReducer((s, a) => s)(existing, change);
 
-      assert.strictEqual(model.pending.action, null);
-      assert.strictEqual(model.pending.state, null);
-      assert.strictEqual(model.state.word, 'value');
+      assert.strictEqual(reducer.pending.action, null);
+      assert.strictEqual(reducer.pending.state, null);
+      assert.strictEqual(reducer.state.word, 'value');
     });
   };
   return { run : run };

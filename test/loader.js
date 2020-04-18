@@ -27,18 +27,18 @@ require.config({
 
 require([
   'QUnit',
-  'test/model',
-  'test/changes',
-  'test/action_model',
-  'test/selection_model',
+  'test/reducer/map',
+  'test/reducer/rooms_and_doors',
+  'test/reducer/action',
+  'test/reducer/selection',
   'test/html_ui',
   'test/canvas_ui',
   'test/extendQUnit'
 ],
-function(QUnit, modelTests, changeTests, actionTests, selectionTests, htmlUiTests, canvasUiTests) {
+function(QUnit, mapTests, roomAndDoorTests, actionTests, selectionTests, htmlUiTests, canvasUiTests) {
 
-  modelTests.run();
-  changeTests.run();
+  mapTests.run();
+  roomAndDoorTests.run();
   actionTests.run();
   selectionTests.run();
   htmlUiTests.run();

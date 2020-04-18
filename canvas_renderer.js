@@ -2,11 +2,11 @@
 
 define([
     'jquery',
-    'selection_model',
+    'reducer/selection',
     'hit_regions',
     'symbols'
   ],
-function($, SelectionModel, hitRegions, symbols) {
+function($, Selection, hitRegions, symbols) {
 
   // TODO: extract so tests can use it.
   var scale = 50;
@@ -118,15 +118,15 @@ function($, SelectionModel, hitRegions, symbols) {
     render(context);
   };
 
-  var render = function(model, context) {
+  var render = function(store, context) {
     clearCanvas(context)
 
-    var state = model.store.getState();
+    var state = store.getState();
     $.each(state.map.state.rooms, function(_index, room) {
-      drawRoom(room, context, model.map);
+      drawRoom(room, context, store.map);
 
       // TODO: will be duplicated; extract
-      if (SelectionModel.selectedIds(state.selection, 'room').includes(room.id)) {
+      if (Selection.selectedIds(state.selection, 'room').includes(room.id)) {
         drawSelectionBox(room, context);
       };
     });
@@ -163,16 +163,16 @@ function($, SelectionModel, hitRegions, symbols) {
   /*
    * Set up listeners to make the canvas interactive.
    */
-  var addListeners = function(canvas, model) {
+  var addListeners = function(canvas, store) {
     var regions = hitRegions(canvas);
 
     regions.reset();
-    var map = model.store.getState().map.state;
+    var map = store.getState().map.state;
     $.each(map.rooms, function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
 
       region.addListener('click', function(event) {
-        var selection = model.store.getState().selection;
+        var selection = store.getState().selection;
         var action = {
           payload: {
             type: 'room',
@@ -181,18 +181,18 @@ function($, SelectionModel, hitRegions, symbols) {
         };
 
         // TODO: will be duplicated; extract
-        if (SelectionModel.selectedIds(selection, 'room').includes(room.id)) {
+        if (Selection.selectedIds(selection, 'room').includes(room.id)) {
           action.type = 'selection.deselect';
         } else {
           action.type = 'selection.select';
         }
 
-        model.store.dispatch(action);
+        store.dispatch(action);
       });
     });
 
     regions.getFallback().addListener('mousedown', function(event) {
-      model.store.dispatch({
+      store.dispatch({
         type: 'action.stage',
         payload: {
           type: 'map.rooms.add',
@@ -214,18 +214,16 @@ function($, SelectionModel, hitRegions, symbols) {
      * This means width and height can go negative, which will have to be corrected for later.
      * TODO: might be better to remember which way we're dragging.
      */
-    var updateAddRoomAction = function(model, newX, newY) {
-      var currentAction = model.store.getState().map.pending.action;
+    var updateAddRoomAction = function(store, newX, newY) {
+      var currentAction = store.getState().map.pending.action;
 
-      if (currentAction.type != 'map.rooms.add') {
-        throw 'Unexpected action ' + currentAction.type + ' when dragging';
-      } else {
+      if (currentAction && currentAction.type == 'map.rooms.add') {
         var roomOriginX = Math.round(currentAction.payload.x);
         var roomOriginY = Math.round(currentAction.payload.y);
         var newCornerX = Math.round(newX / scale);
         var newCornerY = Math.round(newY / scale);
 
-        model.store.dispatch({
+        store.dispatch({
           type: 'action.stage',
           payload: {
             type: 'map.rooms.add',
@@ -237,20 +235,22 @@ function($, SelectionModel, hitRegions, symbols) {
             }
           }
         });
+      } else if (currentAction) {
+        throw 'Unexpected action ' + currentAction.type + ' when dragging';
       }
     }
 
     regions.getFallback().addListener('mousemove', function(event) {
-      updateAddRoomAction(model, event.x, event.y);
+      updateAddRoomAction(store, event.x, event.y);
     });
 
     regions.getFallback().addListener('mouseup', function(event) {
-      updateAddRoomAction(model, event.x, event.y);
-      model.store.dispatch({ type: 'action.finish' });
+      updateAddRoomAction(store, event.x, event.y);
+      store.dispatch({ type: 'action.finish' });
     });
 
     regions.getFallback().addListener('mouseleave', function(event) {
-      model.store.dispatch({ type: 'action.cancel' });
+      store.dispatch({ type: 'action.cancel' });
     });
   };
 
