@@ -73,21 +73,12 @@ function($) {
       };
 
       switch(action.type) {
-        case 'action.start':
+        case 'action.stage':
           return {
             state: state.state,
             pending: {
-              action: action.payload.action,
-              state: state.state
-            }
-          };
-
-        case 'action.update':
-          return {
-            state: state.state,
-            pending: {
-              action: state.pending.action,
-              state: baseReducer(state.pending.state, action.payload)
+              action: action.payload,
+              state: baseReducer(state.state, action.payload)
             }
           };
 
