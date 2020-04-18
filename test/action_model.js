@@ -62,49 +62,6 @@ function(QUnit, ActionModel) {
 
     QUnit.module('Starting actions');
 
-    test('copies current state (via Redux)', function(assert) {
-      var action = 'map.rooms.add';
-      var oldState = { key : 'value' };
-
-      var model = ActionModel.wrapReducer((s, a) => s)({
-        state: oldState,
-        pending: {
-          action: null,
-          state: null,
-        }
-      }, {
-        type: 'action.start',
-        payload: { action }
-      });
-
-      assert.strictEqual(model.pending.action, action);
-      assert.strictEqual(model.pending.state, oldState);
-    });
-
-    test('clears any existing state (via Redux)', function(assert) {
-      var action = 'map.rooms.add';
-      var oldState = { key : 'value' };
-      var pending = {
-        action: 'map.doors.delete',
-        state: { other: 'thing' }
-      };
-      var existingModel = {
-        state: oldState,
-        pending: pending
-      };
-
-      var action = 'map.rooms.add';
-      var model = ActionModel.wrapReducer((s, a) => s)(existingModel, {
-        type: 'action.start',
-        payload: {
-          action
-        }
-      });
-
-      assert.strictEqual(model.pending.action, action);
-      assert.strictEqual(model.pending.state, oldState);
-    });
-
     test("updates state", function(assert) {
       var model = new ActionModel();
       var newAction = 'an_action';
@@ -147,14 +104,14 @@ function(QUnit, ActionModel) {
       model.start(newAction);
     });
 
-    QUnit.module('Updating action data');
+    QUnit.module('Staging action data (via Redux)');
 
-    test ('applies changes (via Redux)', function(assert) {
+    test ('calculates changes to current state', function(assert) {
       var pendingAction = 'word.edit';
       var oldState = { word : 'value' };
       var pending = {
-        action: pendingAction,
-        state: { word: 'newValue' }
+        action: null,
+        state: null
       };
       var existingModel = {
         state: oldState,
@@ -162,7 +119,7 @@ function(QUnit, ActionModel) {
       };
 
       var change = {
-        type: 'action.update',
+        type: 'action.stage',
         payload: {
           action: 'base.append',
           payload: '+Z'
@@ -180,9 +137,11 @@ function(QUnit, ActionModel) {
       };
       var model = ActionModel.wrapReducer(baseReducer)(existingModel, change);
 
-      assert.strictEqual(model.pending.action, pendingAction);
-      assert.strictEqual(model.pending.state.word, 'newValue+Z');
+      assert.strictEqual(model.pending.action, change.payload);
+      assert.strictEqual(model.pending.state.word, 'value+Z');
     });
+
+    QUnit.module('Updating action data');
 
     test("updating action data", function(assert) {
       var model = new ActionModel();
@@ -213,7 +172,10 @@ function(QUnit, ActionModel) {
       var existingModel = {
         state: oldState,
         pending: {
-          action: pendingAction,
+          action: {
+            type: pendingAction,
+            payload: 'newValue'
+          },
           state: { word: 'newValue' }
         }
       };
