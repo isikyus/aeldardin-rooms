@@ -118,46 +118,7 @@ function(QUnit, MapController, hitRegions) {
       );
 
       regions._fire('mouseleave', 0, 0);
-      assert.equal(
-        store.getState().map.pending.action,
-        { type: null, payload: null }
-      );
-
-      assert.deepEqual(store.getState().map.state.rooms, []);
-    });
-
-    test('cancelling a room by not making it big enough', function(assert) {
-      var mapDiv = $('#test-map');
-      var controller = new MapController(mapDiv.find('canvas')[0]);
-      var store = controller.model.store;
-
-      // TODO: make this part of common setup code.
-      var regions = hitRegions(mapDiv.find('canvas'));
-
-      // Start creating a room, and check initial state.
-      regions._fire('mousedown', 1 * scale, 1 * scale);
-      assert.deepEqual(
-        store.getState().map.pending.action.payload,
-        { x: 1, y : 1, width: 0, height: 0}
-      );
-
-      regions._fire('mousemove', 4 * scale, 3 * scale);
-      assert.deepEqual(
-        store.getState().map.pending.action.payload,
-        { x: 1, y : 1, width: 3, height: 2}
-      );
-
-      regions._fire('mousemove', 1 * scale, 3 * scale);
-      assert.deepEqual(
-        store.getState().map.pending.action.payload,
-        { x: 1, y : 1, width: 0, height: 2}
-      );
-
-      regions._fire('mouseup', 1 * scale, 3 * scale);
-      assert.equal(
-        store.getState().map.pending.action,
-        { type: null, payload: null }
-      );
+      assert.equal(store.getState().map.pending.action, null);
 
       assert.deepEqual(store.getState().map.state.rooms, []);
     });

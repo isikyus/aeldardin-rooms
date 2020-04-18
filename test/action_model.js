@@ -93,7 +93,7 @@ function(QUnit, ActionModel) {
 
     QUnit.module('Finishing actions');
 
-    test('copies updates back to main state', function(assert) {
+    test('action.finish applies update to main state', function(assert) {
       var pendingAction = 'word.edit';
       var oldState = { word : 'value' };
 
@@ -115,6 +115,30 @@ function(QUnit, ActionModel) {
       assert.strictEqual(model.pending.action, null);
       assert.strictEqual(model.pending.state, null);
       assert.strictEqual(model.state.word, 'newValue');
+    });
+
+    test('action.cancel forgets pending updates', function(assert) {
+      var pendingAction = 'word.edit';
+      var oldState = { word : 'value' };
+
+      var existingModel = {
+        state: oldState,
+        pending: {
+          action: {
+            type: pendingAction,
+            payload: 'newValue'
+          },
+          state: { word: 'newValue' }
+        }
+      };
+
+      var change = { type: 'action.cancel' };
+
+      var model = ActionModel.wrapReducer((s, a) => s)(existingModel, change);
+
+      assert.strictEqual(model.pending.action, null);
+      assert.strictEqual(model.pending.state, null);
+      assert.strictEqual(model.state.word, 'value');
     });
   };
   return { run : run };
