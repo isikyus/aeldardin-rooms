@@ -3,17 +3,17 @@
 "use strict";
 define([
   'QUnit',
-  'selection_model'
+  'reducer/selection'
 ],
-function(QUnit, SelectionModel) {
+function(QUnit, Selection) {
   var run = function() {
 
     QUnit.module('Selection (via Redux)');
 
     test('selecting a room', function(assert) {
       var initial = 17;
-      var model = SelectionModel.reduce(null, 'selection.clear');
-      model = SelectionModel.reduce(model, {
+      var model = Selection.reduce(null, 'selection.clear');
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -22,7 +22,7 @@ function(QUnit, SelectionModel) {
       });
 
       var newSelection = 3;
-      model = SelectionModel.reduce(model, {
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -30,13 +30,13 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      assert.unorderedEqual(SelectionModel.selectedIds(model, 'room'),
+      assert.unorderedEqual(Selection.selectedIds(model, 'room'),
                             [initial, newSelection]);
     });
     test('selecting an already-selected room', function(assert) {
       var initial = 17;
-      var model = SelectionModel.reduce(null, 'selection.clear');
-      model = SelectionModel.reduce(model, {
+      var model = Selection.reduce(null, 'selection.clear');
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -44,7 +44,7 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      model = SelectionModel.reduce(model, {
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -52,13 +52,13 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      assert.unorderedEqual(SelectionModel.selectedIds(model, 'room'),
+      assert.unorderedEqual(Selection.selectedIds(model, 'room'),
                             [initial]);
     });
     test('deselecting a room', function(assert) {
       var initial = 17;
-      var model = SelectionModel.reduce(null, 'selection.clear');
-      model = SelectionModel.reduce(model, {
+      var model = Selection.reduce(null, 'selection.clear');
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -67,7 +67,7 @@ function(QUnit, SelectionModel) {
       });
 
       var toRemove = 33;
-      model = SelectionModel.reduce(model, {
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -75,10 +75,10 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      assert.unorderedEqual(SelectionModel.selectedIds(model, 'room'),
+      assert.unorderedEqual(Selection.selectedIds(model, 'room'),
                             [initial, toRemove]);
 
-      var result = SelectionModel.reduce(model, {
+      var result = Selection.reduce(model, {
         type: 'selection.deselect',
         payload: {
           type: 'room',
@@ -86,13 +86,13 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      assert.unorderedEqual(SelectionModel.selectedIds(model, 'room'), 
+      assert.unorderedEqual(Selection.selectedIds(model, 'room'),
                             [initial]);
     });
     test("deselecting a room that isn't selected", function(assert) {
       var initial = 17;
-      var model = SelectionModel.reduce(null, 'selection.clear');
-      model = SelectionModel.reduce(model, {
+      var model = Selection.reduce(null, 'selection.clear');
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -101,7 +101,7 @@ function(QUnit, SelectionModel) {
       });
 
       var toNotRemove = 33;
-      model = SelectionModel.reduce(model, {
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'room',
@@ -109,10 +109,10 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      assert.unorderedEqual(SelectionModel.selectedIds(model, 'room'),
+      assert.unorderedEqual(Selection.selectedIds(model, 'room'),
                    [initial, toNotRemove]);
 
-      var result = SelectionModel.reduce(model, {
+      var result = Selection.reduce(model, {
         type: 'selection.deselect',
         payload: {
           type: 'room',
@@ -120,14 +120,14 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      assert.unorderedEqual(SelectionModel.selectedIds(model, 'room'),
+      assert.unorderedEqual(Selection.selectedIds(model, 'room'),
                             [initial, toNotRemove]);
     });
 
     test('selecting a door', function(assert) {
       var initial = 17;
-      var model = SelectionModel.reduce(null, 'selection.clear');
-      model = SelectionModel.reduce(model, {
+      var model = Selection.reduce(null, 'selection.clear');
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'door',
@@ -136,7 +136,7 @@ function(QUnit, SelectionModel) {
       });
 
       var newSelection = 3;
-      model = SelectionModel.reduce(model, {
+      model = Selection.reduce(model, {
         type: 'selection.select',
         payload: {
           type: 'door',
@@ -144,7 +144,7 @@ function(QUnit, SelectionModel) {
         }
       });
 
-      assert.unorderedEqual(SelectionModel.selectedIds(model, 'door'),
+      assert.unorderedEqual(Selection.selectedIds(model, 'door'),
                             [initial, newSelection]);
     });
   };

@@ -2,33 +2,33 @@
 
 define([
     'jquery',
-    'map_model',
+    'reducer/map',
+    'reducer/selection',
     'room',
-    'selection_model',
     'text_renderer/templates'
   ],
-function($, MapModel, Room, SelectionModel, templates) {
+function($, Map, Selection, Room, templates) {
 
   var feetPerSquare = 5;
 
   // Preprocess data to be rendered into templates.
-  var roomInfo = function(model, room) {
-    var state = model.store.getState();
+  var roomInfo = function(store, room) {
+    var state = store.getState();
     return {
       key    : room.key,
       id     : room.id,
       exits  : exitInfo(state, room),
       height : room.height * feetPerSquare,
       width  : room.width * feetPerSquare,
-      selected : SelectionModel.selectedIds(state.selection, 'room').includes(room.id)
+      selected : Selection.selectedIds(state.selection, 'room').includes(room.id)
     }
   }
 
   var exitInfo = function(state, room) {
-    var exits = MapModel.exits(state.map.state)[room.id];
+    var exits = Map.exits(state.map.state)[room.id];
 
     exits.forEach(function(exit) {
-      exit.selected = SelectionModel.selectedIds(state.selection, 'door').includes(exit.door.id);
+      exit.selected = Selection.selectedIds(state.selection, 'door').includes(exit.door.id);
     });
     return exits;
   };
@@ -36,13 +36,13 @@ function($, MapModel, Room, SelectionModel, templates) {
   /*
    * Renders the map as a list of text room descriptions.
    */
-  var render = function(model, container) {
+  var render = function(store, container) {
     var $container = $(container);
 
     $container.empty();
-    var map = model.store.getState().map;
+    var map = store.getState().map;
     $.each(map.state.rooms, function(index, room) {
-      $container.append(templates.room(roomInfo(model, room)));
+      $container.append(templates.room(roomInfo(store, room)));
     });
 
     if (map.pending.action) {
@@ -167,9 +167,9 @@ function($, MapModel, Room, SelectionModel, templates) {
 
   /*
    * Adds event listeners to an element the map will be rendered into.
-   * The given model instance will be updated in response to events.
+   * The given store will be updated in response to events.
    */
-  var addListeners = function(container, model) {
+  var addListeners = function(container, store) {
     var $container = $(container);
 
     $container.on('click', '.js-select-checkbox', function(event) {
@@ -178,7 +178,7 @@ function($, MapModel, Room, SelectionModel, templates) {
           objectId = $checkbox.data('select-id'),
           actionType = $checkbox.is(':checked') ? 'selection.select' : 'selection.deselect';
 
-      model.store.dispatch({
+      store.dispatch({
         type: actionType,
         payload: {
           type: objectType,
@@ -188,9 +188,9 @@ function($, MapModel, Room, SelectionModel, templates) {
     });
 
     $container.on('click', '.js-add_door', function(event) {
-      var room = findRoomForElement(model.store.getState().map.state, this);
+      var room = findRoomForElement(store.getState().map.state, this);
       if (room !== null) {
-        model.store.dispatch({
+        store.dispatch({
           type: 'action.stage',
           payload: {
             type: 'map.doors.add',
@@ -205,7 +205,7 @@ function($, MapModel, Room, SelectionModel, templates) {
     // Fire update events as the edit form contents change.
     $container.on('change', '#js-edit-room input', function(_event) {
 
-      var currentAction = model.store.getState().map.pending.action;
+      var currentAction = store.getState().map.pending.action;
       if (currentAction.type === 'map.rooms.add') {
 
         var $editRoomForm = $('#js-edit-room');
@@ -215,7 +215,7 @@ function($, MapModel, Room, SelectionModel, templates) {
           width : parseInt($editRoomForm.find('#new-room-width').val(), 10),
           height : parseInt($editRoomForm.find('#new-room-height').val(), 10)
         };
-        model.store.dispatch({
+        store.dispatch({
           type: 'action.stage',
           payload: {
             type: 'map.rooms.add',
@@ -230,7 +230,7 @@ function($, MapModel, Room, SelectionModel, templates) {
     // Fire update events as the add-door form changes.
     $container.on('change', '#js-add_door_form select', function(_event) {
 
-      var currentAction = model.store.getState().map.pending.action;
+      var currentAction = store.getState().map.pending.action;
       if (currentAction.type === 'map.doors.add') {
 
         var $addDoorForm = $('#js-add_door_form');
@@ -260,7 +260,7 @@ function($, MapModel, Room, SelectionModel, templates) {
             newDoorY = null;
         }
 
-        model.store.dispatch({
+        store.dispatch({
           type: 'action.stage',
           payload: {
             type: 'map.doors.add',
@@ -280,10 +280,10 @@ function($, MapModel, Room, SelectionModel, templates) {
     // Handle action submit buttons (adding rooms or doors).
     $container.on('click', 'button[data-finish-action]', function(_event) {
       var action = $(this).data('finish-action');
-      var currentAction = model.store.getState().map.pending.action;
+      var currentAction = store.getState().map.pending.action;
 
       if (currentAction.type === action) {
-        model.store.dispatch({ type: 'action.finish' });
+        store.dispatch({ type: 'action.finish' });
       } else {
         console.warn('Tried to finish action "' + action + '" when it was not in progress');
       }

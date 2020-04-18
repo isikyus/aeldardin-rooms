@@ -25,7 +25,7 @@ function(QUnit, MapController, hitRegions) {
         { id: 2, x: 3, y: 0, width: 2, height: 4 },
       ];
       rooms.forEach(function(room) {
-        controller.model.store.dispatch({
+        controller.store.dispatch({
           type: 'map.rooms.add',
           payload: room
         });
@@ -85,7 +85,7 @@ function(QUnit, MapController, hitRegions) {
       createInexactRoom();
       createRoomMovingLeftAndUp();
 
-      var rooms = controller.model.store.getState().map.state.rooms;
+      var rooms = controller.store.getState().map.state.rooms;
       assert.equal(rooms[0].x, 1);
       assert.equal(rooms[0].y, 1);
       assert.equal(rooms[0].width, 1);
@@ -105,7 +105,7 @@ function(QUnit, MapController, hitRegions) {
     test('cancelling a room by moving out of the map', function(assert) {
       var mapDiv = $('#test-map');
       var controller = new MapController(mapDiv.find('canvas')[0]);
-      var store = controller.model.store;
+      var store = controller.store;
 
       // TODO: make this part of common setup code.
       var regions = hitRegions(mapDiv.find('canvas'));

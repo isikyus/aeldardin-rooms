@@ -1,21 +1,19 @@
 define([
     'jquery',
     'redux',
-    'map_model',
-    'selection_model',
-    'action_model',
+    'reducer/map',
+    'reducer/selection',
+    'reducer/action',
     'map_view'
   ],
-function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
+function($, Redux, Map, Selection, Action, MapView) {
   // MVC implementation based on example at <https://alexatnet.com/articles/model-view-controller-mvc-javascript>
 
   var MapController = function(canvas) {
-    this.model = {
-      store : Redux.createStore(reduce)
-    };
-    this.view = new MapView(this.model, canvas);
+    this.store = Redux.createStore(reduce);
+    var store = this.store;
+    this.view = new MapView(store, canvas);
 
-    var store = this.model.store;
     store.subscribe(function() {
       console.log(store.getState());
     });
@@ -33,8 +31,8 @@ function($, Redux, MapModel, SelectionModel, ActionModel, MapView) {
 
     // Calculate new state by having each reducer reduce its own bit.
     return {
-      map: ActionModel.wrapReducer(MapModel.reduce)(state.map, action),
-      selection: SelectionModel.reduce(state.selection, action)
+      map: Action.wrapReducer(Map.reduce)(state.map, action),
+      selection: Selection.reduce(state.selection, action)
     };
   };
 
