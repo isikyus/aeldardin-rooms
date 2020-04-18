@@ -114,7 +114,7 @@ function() {
     }
   };
 
-  // A map of all exits (doors from one room to another).
+  // A dictionary of all exits (doors from one room to another).
   var exits = function(map) {
       var exits = {};
 
