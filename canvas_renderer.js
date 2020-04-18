@@ -250,8 +250,7 @@ function($, SelectionModel, hitRegions, symbols) {
     });
 
     regions.getFallback().addListener('mouseleave', function(event) {
-      // TODO: can't cancel action yet, so rely on next user action being something else.
-      //model.store.dispatch({ type: 'action.finish' });
+      model.store.dispatch({ type: 'action.cancel' });
     });
   };
 

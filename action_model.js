@@ -41,6 +41,15 @@ function($) {
             }
           };
 
+        case 'action.cancel':
+          return {
+            state: state.state,
+            pending: {
+              action: null,
+              state: null
+            }
+          };
+
         default:
           return {
             state: baseReducer(state.state, action),
