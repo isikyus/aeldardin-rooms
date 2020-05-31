@@ -41,7 +41,7 @@ function() {
    */
   var selectedIds = function(state, type) {
     return state.filter(function(selection) {
-      return selection.objectType == type;
+      return selection.objectType === type;
     }).map(function(selection) {
       return selection.selectedId;
     });

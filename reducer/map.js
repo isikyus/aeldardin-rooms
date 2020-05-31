@@ -123,7 +123,7 @@ function(Redux) {
               // TODO: only need to loop over a triangular subarray to get every pair.
               // Every door in this room will connect to this room,
               // but that doesn't count as an exit from the room to itself.
-              if (otherRoom == room) return;
+              if (otherRoom === room) return;
 
               // Find doors connecting these two rooms.
               // TODO: won't work if there are multiple possible connections.
@@ -131,10 +131,9 @@ function(Redux) {
                 exit.room = otherRoom;
               }
             });
-console.log(exit);
             exits[room.id].push(exit);
-          };
-        });
+          }
+        })
       });
 
       return exits;
