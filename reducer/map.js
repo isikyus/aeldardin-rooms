@@ -42,10 +42,7 @@ function(Redux) {
         return state.concat(newRoom);
 
       case 'map.rooms.remove':
-        var idsToRemove = action.payload.roomIds;
-        return state.filter(function(room) {
-          return (idsToRemove.indexOf(room.id) < 0);
-        });
+        return removeById(state, action.payload.roomIds);
 
       default:
         return state;
@@ -70,15 +67,18 @@ function(Redux) {
         return state.concat(newDoor);
 
       case 'map.doors.remove':
-        var idsToRemove = action.payload.doorIds;
-        return state.filter(function(door) {
-          return (idsToRemove.indexOf(door.id) < 0);
-        });
+        return removeById(state, action.payload.doorIds);
 
       default:
         return state;
     }
   };
+
+  var removeById = function(list, idsToRemove) {
+    return list.filter(function(object) {
+      return (idsToRemove.indexOf(object.id) < 0);
+    });
+  }
 
   // Check if the door lines up with an edge of the given room.
   var connectsTo = function(door, room) {
