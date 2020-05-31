@@ -36,21 +36,5 @@ function($, Redux, Map, Selection, Action, MapView) {
     };
   };
 
-  // TODO: need to update this to work with Redux.
-  MapController.prototype = {
-    load : function(path) {
-
-      $.getJSON(path, function(mapData) {
-        this.useData(mapData);
-      }).fail(function() {
-        console.log('Could not load map from ' + path);
-        $(canvas).children().unwrap();
-      });
-    },
-    useData : function(mapData) {
-      this.model.map.setRooms(mapData);
-    }
-  };
-
   return MapController;
 });
