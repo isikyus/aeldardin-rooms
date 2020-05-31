@@ -23,28 +23,14 @@ function($, canvasRenderer, textRenderer, Selection) {
    *@param $toolbar The toolbar div, as a jQuery object (hence the $).
    */
   var addToolbarListeners = function($toolbar, store) {
-    $toolbar.find('#delete_selection').on('click', function() {
+    $toolbar.find('#delete_selection').on(
+      'click',
+      dispatchDelete.bind(this, store)
+    );
 
-      var state = store.getState();
-      var roomIdsToDelete = Selection.selectedIds(state.selection, 'room');
-      store.dispatch({
-        type: 'map.rooms.remove',
-        payload: { roomIds: roomIdsToDelete }
-      });
-
-      var doorIdsToDelete = Selection.selectedIds(state.selection, 'door');
-      store.dispatch({
-        type: 'map.doors.remove',
-        payload: { doorIds: doorIdsToDelete }
-      });
-
-      // Clear selection now we've deleted everything that was in it.
-      store.dispatch({ type: 'selection.clear' });
-    });
-
-    $toolbar.find('#add_room').on('click', function() {
-
-      store.dispatch({
+    $toolbar.find('#add_room').on(
+      'click',
+      store.dispatch.bind(store, {
         type: 'action.stage',
         payload: {
           type: 'map.rooms.add',
@@ -55,9 +41,28 @@ function($, canvasRenderer, textRenderer, Selection) {
             height: 1
           }
         }
-      });
-    });
+      })
+    );
   };
+
+  // TODO: consider converting to a Redux thunk?
+  var dispatchDelete = function(store) {
+    var state = store.getState();
+    var roomIdsToDelete = Selection.selectedIds(state.selection, 'room');
+    store.dispatch({
+      type: 'map.rooms.remove',
+      payload: { roomIds: roomIdsToDelete }
+    });
+
+    var doorIdsToDelete = Selection.selectedIds(state.selection, 'door');
+    store.dispatch({
+      type: 'map.doors.remove',
+      payload: { doorIds: doorIdsToDelete }
+    });
+
+    // Clear selection now we've deleted everything that was in it.
+    store.dispatch({ type: 'selection.clear' });
+  }
 
   // MVC implementation based on example from <https://alexatnet.com/articles/model-view-controller-mvc-javascript>
 
