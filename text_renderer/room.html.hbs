@@ -12,23 +12,29 @@
     {{#each exits}}
       <li id="door_{{door.id}}" class="js-door" data-door-id="{{door.id}}">
         <label>
-          <input type="checkbox" id="select_door_{{door.id}}"
-              class="js-select-door-checkbox"
-              {{#if door.selected}}checked{{/if}} />
+          <input type="checkbox"
+                 class="js-select-checkbox"
+                 data-select-type="door"
+                 data-select-id="{{door.id}}"
+                 {{#if selected}}checked{{/if}} />
           <!-- TODO: this is wrong -- the door direction may need reversing if it belongs to a square in the other room. -->
-          A {{displayDoorType door.style}} in the {{door.direction}} wall,
-          leading to <a href="#room_{{room.id}}">Room {{room.key}}</a>.
+          A {{displayDoorType door.style}} in the {{door.direction}} wall.
+          {{#if room}}
+            It leads to <a href="#room_{{room.id}}">Room {{room.key}}</a>.
+          {{/if}}
         </label>
       </li>
     {{/each}}
   </ol>
-  <div class="edit-room" data-room-key="{{key}}">
+  <div class="edit-room" data-room-id="{{id}}">
     <p class="select-room"><label>
-      <input type="checkbox" id="select_room_{{id}}" class="js-select-checkbox"
-        {{#if selected}}checked{{/if}}/>
+      <input type="checkbox"
+             class="js-select-checkbox"
+             data-select-type="room"
+             data-select-id="{{id}}"
+             {{#if selected}}checked{{/if}}/>
       Select
     </label></p>
-    <button class="js-remove-room">Remove</button>
     <button class="js-add_door">Add Door</button>
   </div>
 </div>

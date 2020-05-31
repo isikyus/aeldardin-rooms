@@ -2,52 +2,76 @@
 
 define([
     'jquery',
+    'reducer/map',
+    'reducer/selection',
+    'room',
     'text_renderer/templates'
   ],
-function($, templates) {
+function($, Map, Selection, Room, templates) {
 
   var feetPerSquare = 5;
 
   // Preprocess data to be rendered into templates.
-  var roomInfo = function(model, room) {
+  var roomInfo = function(store, room) {
+    var state = store.getState();
     return {
       key    : room.key,
       id     : room.id,
-      exits  : model.map.exits(room),
+      exits  : exitInfo(state, room),
       height : room.height * feetPerSquare,
       width  : room.width * feetPerSquare,
-      selected : model.selection.isSelected(room.id)
+      selected : Selection.isSelected(state.selection, 'room', room.id)
     }
   }
+
+  var exitInfo = function(state, room) {
+    var exits = Map.exits(state.map.state)[room.id];
+
+    exits.forEach(function(exit) {
+      exit.selected = Selection.isSelected(state.selection, 'door', exit.door.id);
+    });
+    return exits;
+  };
 
   /*
    * Renders the map as a list of text room descriptions.
    */
-  var render = function(model, container) {
+  var render = function(store, container) {
     var $container = $(container);
 
     $container.empty();
-    $.each(model.map.getRooms(), function(index, room) {
-      $container.append(templates.room(roomInfo(model, room)));
+    var map = store.getState().map;
+    $.each(map.state.rooms, function(index, room) {
+      $container.append(templates.room(roomInfo(store, room)));
     });
+
+    if (map.pending.action) {
+      renderInteraction(map.pending, container);
+    }
   };
 
   /*
    * Renders a form for editing the intermediate state of an action.
    */
-  var renderInteraction = function(action, state, container) {
+  var renderInteraction = function(pendingState, container) {
 
-    if (action === 'add_room') {
-      renderAddRoom(state, container);
-    } else if (action === 'add_door') {
-      renderAddDoor(state, container);
-    } else {
-      console.warn('unexpected action ' + action);
+    switch(pendingState.action.type) {
+      case 'map.rooms.add':
+        renderAddRoom(pendingState, container);
+        break;
+
+      case 'map.doors.add':
+        renderAddDoor(pendingState, container);
+        break;
+
+      default:
+        console.warn('unexpected action ' + pendingState.action.type);
     }
   };
 
-  var renderAddRoom = function(state, container) {
-    var $container = $(container);
+  var renderAddRoom = function(pendingState, container) {
+    var $container = $(container),
+        roomDetails = pendingState.action.payload;
 
     // Use the existing edit form, if present; otherwise, add it.
     var editRoomForm = $container.find('#js-edit-room');
@@ -56,17 +80,19 @@ function($, templates) {
     }
 
     // Set X, Y, Width, and Height based on the action state.
-    editRoomForm.find('#new-room-x').val(state.x);
-    editRoomForm.find('#new-room-y').val(state.y);
-    editRoomForm.find('#new-room-width').val(state.width);
-    editRoomForm.find('#new-room-height').val(state.height);
+    editRoomForm.find('#new-room-x').val(roomDetails.x);
+    editRoomForm.find('#new-room-y').val(roomDetails.y);
+    editRoomForm.find('#new-room-width').val(roomDetails.width);
+    editRoomForm.find('#new-room-height').val(roomDetails.height);
 
     // Make sure the form is visible.
     $container.prepend(editRoomForm);
   };
 
-  var renderAddDoor = function(state, container) {
-    var $container = $(container);
+  var renderAddDoor = function(pendingState, container) {
+    var $container = $(container),
+        doorDetails = pendingState.action.payload,
+        map = pendingState.state;
 
       // Insert form if necessary.
       var $addDoorForm = $container.find('#js-add_door_form');
@@ -75,15 +101,16 @@ function($, templates) {
       }
 
       // Fill in the form based on the action state.
-      $addDoorForm.find('#js-room-for-door').text('(in room ' + state.room.key + ')');
-      $addDoorForm.find('#new-door-direction').val(state.direction);
+      $addDoorForm.find('#js-room-for-door').text('(in room ' + doorDetails.room.key + ')');
+      $addDoorForm.find('#new-door-direction').val(doorDetails.direction);
 
       // Fill in possible positions.
-      // TODO: only do this if the direction has changed.
+      // OPTIMISATION: only do this if the direction has changed.
       var $positionSelect = $addDoorForm.find('#new-door-position')
       $positionSelect.empty();
 
-      var wall = state.room.getWalls()[state.direction];
+      var room = findByUniqueId(map.rooms, 'id', doorDetails.room.id);
+      var wall = Room.walls(room)[doorDetails.direction];
       if (wall) {
 
           for(var i = 0; i < wall.length; i++) {
@@ -94,7 +121,7 @@ function($, templates) {
               option.attr('value', value);
 
               // Make sure the option corresponding to the proposed door position is selected.
-              if (value === state[wall.parallelAxis]) {
+              if (value === doorDetails[wall.parallelAxis]) {
                   option.attr('selected', 'selected');
               }
 
@@ -105,7 +132,7 @@ function($, templates) {
               $positionSelect.append(option);
           }
       } else {
-          console.warn('Unexpected door direction: ' + state.direction);
+          console.warn('Unexpected door direction: ' + doorDetails.direction);
       }
 
       $container.prepend($addDoorForm);
@@ -133,64 +160,53 @@ function($, templates) {
 
   // Takes a element within a room div, finds the room key for that div, and uses it to look up the room itself.
   // Returns the Room on success, or nul on failure.
-  var findRoomForElement = function(model, element) {
-    var key = $(element).closest('div.edit-room').data('room-key');
-    return findByUniqueId(model.map.getRooms(), 'key', key);
-  }
-
-  // As above, but for doors (find a door in the model for the given element, or return null if none found).
-  var findDoorForElement = function(model, element) {
-    var id = $(element).closest('li.js-door').data('door-id');
-    return findByUniqueId(model.map.getDoors(), 'id', id);
+  var findRoomForElement = function(map, element) {
+    var id = $(element).closest('div.edit-room').data('room-id');
+    return findByUniqueId(map.rooms, 'id', id);
   }
 
   /*
    * Adds event listeners to an element the map will be rendered into.
-   * The given model instance will be updated in response to events.
+   * The given store will be updated in response to events.
    */
-  var addListeners = function(container, model) {
+  var addListeners = function(container, store) {
     var $container = $(container);
 
-    $container.on('click', '.js-remove-room', function(event) {
-      var room = findRoomForElement(model, this);
-      if (room !== null) {
-        model.map.removeRoom(room);
-      }
-    });
-
     $container.on('click', '.js-select-checkbox', function(event) {
-      var room = findRoomForElement(model, this);
-      if (room !== null) {
-        if ($(this).is(':checked')) {
-          model.selection.select(room.id);
-        } else {
-          model.selection.deselect(room.id);
+      var $checkbox = $(this),
+          objectType = $checkbox.data('select-type'),
+          objectId = $checkbox.data('select-id'),
+          actionType = $checkbox.is(':checked') ? 'selection.select' : 'selection.deselect';
+
+      store.dispatch({
+        type: actionType,
+        payload: {
+          type: objectType,
+          id: objectId
         }
-      }
+      });
     });
 
     $container.on('click', '.js-add_door', function(event) {
-      var room = findRoomForElement(model, this);
+      var room = findRoomForElement(store.getState().map.state, this);
       if (room !== null) {
-        model.action.start('add_door', { room: room, x: null, y: null, direction: null});
-      }
-    });
-
-    $container.on('click', '.js-select-door-checkbox', function(event) {
-      var door = findDoorForElement(model, this);
-      if (door !== null) {
-        if ($(this).is(':checked')) {
-          model.selection.doors.select(door.id);
-        } else {
-          model.selection.doors.deselect(door.id);
-        }
+        store.dispatch({
+          type: 'action.stage',
+          payload: {
+            type: 'map.doors.add',
+            // TODO: probably better to only include the room ID;
+            // or don't specify room at all, just location?
+            payload: { room: room, x: null, y: null, direction: null}
+          }
+        });
       }
     });
 
     // Fire update events as the edit form contents change.
     $container.on('change', '#js-edit-room input', function(_event) {
 
-      if (model.action.action === 'add_room') {
+      var currentAction = store.getState().map.pending.action;
+      if (currentAction.type === 'map.rooms.add') {
 
         var $editRoomForm = $('#js-edit-room');
         var roomProperties = {
@@ -199,7 +215,13 @@ function($, templates) {
           width : parseInt($editRoomForm.find('#new-room-width').val(), 10),
           height : parseInt($editRoomForm.find('#new-room-height').val(), 10)
         };
-        model.action.update(roomProperties);
+        store.dispatch({
+          type: 'action.stage',
+          payload: {
+            type: 'map.rooms.add',
+            payload: roomProperties
+          }
+        });
       } else {
         console.warn('Tried to work on adding room when not in that state');
       }
@@ -208,11 +230,12 @@ function($, templates) {
     // Fire update events as the add-door form changes.
     $container.on('change', '#js-add_door_form select', function(_event) {
 
-      if (model.action.action === 'add_door') {
+      var currentAction = store.getState().map.pending.action;
+      if (currentAction.type === 'map.doors.add') {
 
         var $addDoorForm = $('#js-add_door_form');
         var direction = $addDoorForm.find('#new-door-direction').val();
-        var room = model.action.actionData.room;
+        var room = currentAction.payload.room;
 
         // TODO: need separate tests for these calculations.
 
@@ -237,7 +260,18 @@ function($, templates) {
             newDoorY = null;
         }
 
-        model.action.update({room: room, direction : direction, x: newDoorX, y: newDoorY });
+        store.dispatch({
+          type: 'action.stage',
+          payload: {
+            type: 'map.doors.add',
+            payload: {
+              room: room,
+              direction: direction,
+              x: newDoorX,
+              y: newDoorY
+            }
+          }
+        });
       } else {
         console.warn('Tried to work on adding door when not in that state');
       }
@@ -246,8 +280,10 @@ function($, templates) {
     // Handle action submit buttons (adding rooms or doors).
     $container.on('click', 'button[data-finish-action]', function(_event) {
       var action = $(this).data('finish-action');
-      if (model.action.action === action) {
-        model.action.finish(action);
+      var currentAction = store.getState().map.pending.action;
+
+      if (currentAction.type === action) {
+        store.dispatch({ type: 'action.finish' });
       } else {
         console.warn('Tried to finish action "' + action + '" when it was not in progress');
       }

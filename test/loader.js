@@ -8,7 +8,8 @@ require.config({
         'QUnit': 'vendor/qunit-1.19.0',
         'jquery': 'vendor/jquery',
         'handlebars': 'vendor/handlebars',
-        'text': 'vendor/text'
+        'text': 'vendor/text',
+        'redux': 'vendor/redux'
     },
     shim: {
        'QUnit': {
@@ -17,24 +18,27 @@ require.config({
                QUnit.config.autoload = false;
                QUnit.config.autostart = false;
            }
+       },
+       'redux': {
+         exports: 'Redux'
        }
     }
 });
 
 require([
   'QUnit',
-  'test/model',
-  'test/changes',
-  'test/action_model',
-  'test/selection_model',
+  'test/reducer/map',
+  'test/reducer/rooms_and_doors',
+  'test/reducer/action',
+  'test/reducer/selection',
   'test/html_ui',
   'test/canvas_ui',
   'test/extendQUnit'
 ],
-function(QUnit, modelTests, changeTests, actionTests, selectionTests, htmlUiTests, canvasUiTests) {
+function(QUnit, mapTests, roomAndDoorTests, actionTests, selectionTests, htmlUiTests, canvasUiTests) {
 
-  modelTests.run();
-  changeTests.run();
+  mapTests.run();
+  roomAndDoorTests.run();
   actionTests.run();
   selectionTests.run();
   htmlUiTests.run();

@@ -20,11 +20,16 @@ function(QUnit, MapController, hitRegions) {
 
       // Create a simple three-room map.
       var rooms = [
-        { id: 0, x: 0, y: 0, width: 3, height: 2, wallFeatures: [] },
-        { id: 1, x: 0, y: 2, width: 3, height: 2, wallFeatures: [] },
-        { id: 2, x: 3, y: 0, width: 2, height: 4, wallFeatures: [] },
+        { id: 0, x: 0, y: 0, width: 3, height: 2 },
+        { id: 1, x: 0, y: 2, width: 3, height: 2 },
+        { id: 2, x: 3, y: 0, width: 2, height: 4 },
       ];
-      controller.model.map.setRooms(rooms);
+      rooms.forEach(function(room) {
+        controller.store.dispatch({
+          type: 'map.rooms.add',
+          payload: room
+        });
+      });
 
       var regions = hitRegions(mapDiv.find('canvas'));
 
@@ -80,7 +85,7 @@ function(QUnit, MapController, hitRegions) {
       createInexactRoom();
       createRoomMovingLeftAndUp();
 
-      var rooms = controller.model.map.getRooms();
+      var rooms = controller.store.getState().map.state.rooms;
       assert.equal(rooms[0].x, 1);
       assert.equal(rooms[0].y, 1);
       assert.equal(rooms[0].width, 1);
@@ -100,43 +105,22 @@ function(QUnit, MapController, hitRegions) {
     test('cancelling a room by moving out of the map', function(assert) {
       var mapDiv = $('#test-map');
       var controller = new MapController(mapDiv.find('canvas')[0]);
+      var store = controller.store;
 
       // TODO: make this part of common setup code.
       var regions = hitRegions(mapDiv.find('canvas'));
-      var action = controller.model.action;
 
       // Start creating a room, and check initial state.
       regions._fire('mousedown', 1 * scale, 1 * scale);
-      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 0, height: 0});
+      assert.deepEqual(
+        store.getState().map.pending.action.payload,
+        { x: 1, y : 1, width: 0, height: 0}
+      );
 
       regions._fire('mouseleave', 0, 0);
-      assert.equal(action.actionData, null);
+      assert.equal(store.getState().map.pending.action, null);
 
-      assert.deepEqual(controller.model.map.getRooms(), []);
-    });
-
-    test('cancelling a room by not making it big enough', function(assert) {
-      var mapDiv = $('#test-map');
-      var controller = new MapController(mapDiv.find('canvas')[0]);
-
-      // TODO: make this part of common setup code.
-      var regions = hitRegions(mapDiv.find('canvas'));
-      var action = controller.model.action;
-
-      // Start creating a room, and check initial state.
-      regions._fire('mousedown', 1 * scale, 1 * scale);
-      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 0, height: 0});
-
-      regions._fire('mousemove', 4 * scale, 3 * scale);
-      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 3, height: 2});
-
-      regions._fire('mousemove', 1 * scale, 3 * scale);
-      assert.deepEqual(action.actionData, { x: 1, y : 1, width: 0, height: 2});
-
-      regions._fire('mouseup', 1 * scale, 3 * scale);
-      assert.equal(action.actionData, null);
-
-      assert.deepEqual(controller.model.map.getRooms(), []);
+      assert.deepEqual(store.getState().map.state.rooms, []);
     });
   };
   return { run : run }

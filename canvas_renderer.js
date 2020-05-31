@@ -2,10 +2,11 @@
 
 define([
     'jquery',
+    'reducer/selection',
     'hit_regions',
     'symbols'
   ],
-function($, hitRegions, symbols) {
+function($, Selection, hitRegions, symbols) {
 
   // TODO: extract so tests can use it.
   var scale = 50;
@@ -60,8 +61,8 @@ function($, hitRegions, symbols) {
         x : exit.door.x * scale,
         y : exit.door.y * scale
       };
-      offset = (exit.door.room_id == room.id) ? 15 : -25;
-      char   = (exit.door.room_id == room.id) ? '^' : ' v';
+      offset = (exit.door.room_id === room.id) ? 15 : -25;
+      char   = (exit.door.room_id === room.id) ? '^' : ' v';
       orient(d2, context);
 
       context.fillStyle = 'green';
@@ -90,15 +91,15 @@ function($, hitRegions, symbols) {
 
     // We rotate in every case except 'north', so the decreasing y-direction is always out of the room.
     // This is important for symbols with direction (e.g. swing doors).
-    if (direction == 'north') {
+    if (direction === 'north') {
       context.translate(x, y);
-    } else if (direction == 'south') {
+    } else if (direction === 'south') {
       context.translate(x + scale, y + scale);
       context.rotate(Math.PI);
-    } else if (direction == 'east') {
+    } else if (direction === 'east') {
       context.translate(x + scale, y);
       context.rotate(Math.PI / 2);
-    } else if (direction == 'west') {
+    } else if (direction === 'west') {
       context.translate(x, y + scale);
       context.rotate(-Math.PI / 2);
     } else {
@@ -117,20 +118,25 @@ function($, hitRegions, symbols) {
     render(context);
   };
 
-  var render = function(model, context) {
+  var render = function(store, context) {
     clearCanvas(context)
 
-    $.each(model.map.getRooms(), function(_index, room) {
-      drawRoom(room, context, model.map);
+    var state = store.getState();
+    $.each(state.map.state.rooms, function(_index, room) {
+      drawRoom(room, context, store.map);
 
-      if (model.selection.isSelected(room.id)) {
+      if (Selection.isSelected(state.selection, 'room', room.id)) {
         drawSelectionBox(room, context);
-      };
-
-      $.each(room['wallFeatures'], function(_index, feature) {
-        drawWallFeature(feature, context);
-      });
+      }
     });
+
+    $.each(state.map.state.doors, function(_index, feature) {
+      drawWallFeature(feature, context);
+    });
+
+    if (state.map.pending.action) {
+      renderInteraction(state.map.pending.action, context);
+    }
   };
 
   /*
@@ -138,12 +144,17 @@ function($, hitRegions, symbols) {
    * (e.g. a room being created).
    * render() should be called first to get rid of any existing partial state.
    */
-  var renderInteraction = function(action, state, context) {
+  var renderInteraction = function(action, context) {
 
-    if (action == 'add_room') {
+    if (action.type === 'map.rooms.add') {
       context.save();
       context.strokeStyle = 'red';
-      context.strokeRect(state.x * scale, state.y * scale, state.width * scale, state.height * scale);
+      context.strokeRect(
+        action.payload.x * scale,
+        action.payload.y * scale,
+        action.payload.width * scale,
+        action.payload.height * scale
+      );
       context.restore();
     };
   };
@@ -151,31 +162,45 @@ function($, hitRegions, symbols) {
   /*
    * Set up listeners to make the canvas interactive.
    */
-  var addListeners = function(canvas, model) {
+  var addListeners = function(canvas, store) {
     var regions = hitRegions(canvas);
 
     regions.reset();
-    $.each(model.map.getRooms(), function(_index, room) {
+    var map = store.getState().map.state;
+    $.each(map.rooms, function(_index, room) {
       var region = regions.add(room.x * scale, room.y * scale, room.width * scale, room.height * scale);
 
       region.addListener('click', function(event) {
-        var selection = model.selection;
+        var selection = store.getState().selection;
+        var action = {
+          payload: {
+            type: 'room',
+            id: room.id
+          }
+        };
 
-        if (selection.isSelected(room.id)) {
-          selection.deselect(room.id);
+        if (Selection.isSelected(selection, 'room', room.id)) {
+          action.type = 'selection.deselect';
         } else {
-          selection.select(room.id);
+          action.type = 'selection.select';
         }
+
+        store.dispatch(action);
       });
     });
 
-    var action = model.action;
     regions.getFallback().addListener('mousedown', function(event) {
-      action.start('add_room', {
-        x : event.x / scale,
-        y : event.y / scale,
-        width: 0,
-        height: 0
+      store.dispatch({
+        type: 'action.stage',
+        payload: {
+          type: 'map.rooms.add',
+          payload: {
+            x : event.x / scale,
+            y : event.y / scale,
+            width: 0,
+            height: 0
+          }
+        }
       });
     });
 
@@ -185,40 +210,45 @@ function($, hitRegions, symbols) {
      *
      * Leaves the top-left corner unchanged, so the user can drag around it.
      * This means width and height can go negative, which will have to be corrected for later.
-     *
-     * Assumes the current action is 'add_room'
+     * TODO: might be better to remember which way we're dragging.
      */
-    var updateAddRoomAction = function(action, newX, newY) {
-        var roomOriginX = Math.round(action.actionData.x);
-        var roomOriginY = Math.round(action.actionData.y);
+    var updateAddRoomAction = function(store, newX, newY) {
+      var currentAction = store.getState().map.pending.action;
+
+      if (currentAction && currentAction.type == 'map.rooms.add') {
+        var roomOriginX = Math.round(currentAction.payload.x);
+        var roomOriginY = Math.round(currentAction.payload.y);
         var newCornerX = Math.round(newX / scale);
         var newCornerY = Math.round(newY / scale);
 
-        action.update({
-          x : roomOriginX,
-          y : roomOriginY,
-          width: newCornerX - roomOriginX,
-          height: newCornerY - roomOriginY
+        store.dispatch({
+          type: 'action.stage',
+          payload: {
+            type: 'map.rooms.add',
+            payload: {
+              x : roomOriginX,
+              y : roomOriginY,
+              width: newCornerX - roomOriginX,
+              height: newCornerY - roomOriginY
+            }
+          }
         });
+      } else if (currentAction) {
+        throw 'Unexpected action ' + currentAction.type + ' when dragging';
+      }
     }
 
     regions.getFallback().addListener('mousemove', function(event) {
-      if (action.action == 'add_room') {
-        updateAddRoomAction(action, event.x, event.y);
-      }
+      updateAddRoomAction(store, event.x, event.y);
     });
 
     regions.getFallback().addListener('mouseup', function(event) {
-      if (action.action == 'add_room') {
-        updateAddRoomAction(action, event.x, event.y);
-        action.finish();
-      }
+      updateAddRoomAction(store, event.x, event.y);
+      store.dispatch({ type: 'action.finish' });
     });
 
     regions.getFallback().addListener('mouseleave', function(event) {
-      if (action.action == 'add_room') {
-        action.cancel();
-      }
+      store.dispatch({ type: 'action.cancel' });
     });
   };
 
