@@ -7,6 +7,13 @@ function($) {
 
   var ActionModel = {};
 
+  // Default values when there's no action in progress.
+  // `action` defaults to `null` as it's deliberately blank, not indeterminate.
+  var NO_ACTION = {
+    action: null,
+    state: undefined
+  }
+
   // Build a reducer that stores the intermediate state of the action
   // separately from the main "finished" state managed by the main
   // reducer.
@@ -16,10 +23,7 @@ function($) {
       // Set initial state
       state = state || {
         state: undefined,
-        pending: {
-          action: undefined,
-          state: undefined
-        }
+        pending: NO_ACTION
       };
 
       switch(action.type) {
@@ -35,22 +39,13 @@ function($) {
         case 'action.finish':
           return {
             state: state.pending.state,
-            pending: {
-
-              // Set to null rather than undefined,
-              // as we _know_ no action is going on.
-              action: null,
-              state: undefined
-            }
+            pending: NO_ACTION
           };
 
         case 'action.cancel':
           return {
             state: state.state,
-            pending: {
-              action: null,
-              state: undefined
-            }
+            pending: NO_ACTION
           };
 
         default:
