@@ -125,10 +125,9 @@ function($, Selection, hitRegions, symbols) {
     $.each(state.map.state.rooms, function(_index, room) {
       drawRoom(room, context, store.map);
 
-      // TODO: will be duplicated; extract
-      if (Selection.selectedIds(state.selection, 'room').includes(room.id)) {
+      if (Selection.isSelected(state.selection, 'room', room.id)) {
         drawSelectionBox(room, context);
-      };
+      }
     });
 
     $.each(state.map.state.doors, function(_index, feature) {
@@ -180,8 +179,7 @@ function($, Selection, hitRegions, symbols) {
           }
         };
 
-        // TODO: will be duplicated; extract
-        if (Selection.selectedIds(selection, 'room').includes(room.id)) {
+        if (Selection.isSelected(selection, 'room', room.id)) {
           action.type = 'selection.deselect';
         } else {
           action.type = 'selection.select';
