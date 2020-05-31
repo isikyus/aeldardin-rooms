@@ -47,8 +47,16 @@ function() {
     });
   };
 
+  /**
+   * Check if a given object is selected
+   */
+  var isSelected = function(state, type, id) {
+    return selectedIds(state, type).includes(id);
+  };
+
   return {
     selectedIds: selectedIds,
+    isSelected: isSelected,
     reduce: reduce
   };
 });

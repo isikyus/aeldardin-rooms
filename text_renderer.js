@@ -20,7 +20,7 @@ function($, Map, Selection, Room, templates) {
       exits  : exitInfo(state, room),
       height : room.height * feetPerSquare,
       width  : room.width * feetPerSquare,
-      selected : Selection.selectedIds(state.selection, 'room').includes(room.id)
+      selected : Selection.isSelected(state.selection, 'room', room.id)
     }
   }
 
@@ -28,7 +28,7 @@ function($, Map, Selection, Room, templates) {
     var exits = Map.exits(state.map.state)[room.id];
 
     exits.forEach(function(exit) {
-      exit.selected = Selection.selectedIds(state.selection, 'door').includes(exit.door.id);
+      exit.selected = Selection.isSelected(state.selection, 'door', exit.door.id);
     });
     return exits;
   };
