@@ -20,7 +20,7 @@ function(QUnit, Action) {
 
       assert.strictEqual(state.state, 'initial', 'Newly created models have initial state of inner reducer');
       assert.deepEqual(state.pending, {
-        action: undefined,
+        action: null,
         state: undefined,
       }, 'Newly created models come without action data');
     });
@@ -31,7 +31,7 @@ function(QUnit, Action) {
           word: 'test'
         },
         pending: {
-          action: undefined,
+          action: null,
           state: undefined
         }
       };
@@ -50,7 +50,7 @@ function(QUnit, Action) {
       var state = reducer(initialState, {type: 'base.append', payload: '+Z'});
 
       assert.strictEqual(state.state.word, 'test+Z');
-      assert.strictEqual(state.pending.action, undefined);
+      assert.strictEqual(state.pending.action, null);
       assert.strictEqual(state.pending.state, undefined);
     });
 
@@ -60,7 +60,7 @@ function(QUnit, Action) {
       var pendingAction = 'word.edit';
       var oldState = { word : 'value' };
       var pending = {
-        action: undefined,
+        action: null,
         state: undefined
       };
       var existing = {
