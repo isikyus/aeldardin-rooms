@@ -61,8 +61,8 @@ function($, Selection, hitRegions, symbols) {
         x : exit.door.x * scale,
         y : exit.door.y * scale
       };
-      offset = (exit.door.room_id == room.id) ? 15 : -25;
-      char   = (exit.door.room_id == room.id) ? '^' : ' v';
+      offset = (exit.door.room_id === room.id) ? 15 : -25;
+      char   = (exit.door.room_id === room.id) ? '^' : ' v';
       orient(d2, context);
 
       context.fillStyle = 'green';
@@ -91,15 +91,15 @@ function($, Selection, hitRegions, symbols) {
 
     // We rotate in every case except 'north', so the decreasing y-direction is always out of the room.
     // This is important for symbols with direction (e.g. swing doors).
-    if (direction == 'north') {
+    if (direction === 'north') {
       context.translate(x, y);
-    } else if (direction == 'south') {
+    } else if (direction === 'south') {
       context.translate(x + scale, y + scale);
       context.rotate(Math.PI);
-    } else if (direction == 'east') {
+    } else if (direction === 'east') {
       context.translate(x + scale, y);
       context.rotate(Math.PI / 2);
-    } else if (direction == 'west') {
+    } else if (direction === 'west') {
       context.translate(x, y + scale);
       context.rotate(-Math.PI / 2);
     } else {
@@ -147,7 +147,7 @@ function($, Selection, hitRegions, symbols) {
    */
   var renderInteraction = function(action, context) {
 
-    if (action.type == 'map.rooms.add') {
+    if (action.type === 'map.rooms.add') {
       context.save();
       context.strokeStyle = 'red';
       context.strokeRect(
