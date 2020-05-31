@@ -16,12 +16,12 @@ function(QUnit, Action) {
       }
 
       var reducer = Action.wrapReducer(baseReducer);
-      var state = reducer(null, 'NO-OP')
+      var state = reducer(undefined, 'NO-OP')
 
       assert.strictEqual(state.state, 'initial', 'Newly created models have initial state of inner reducer');
       assert.deepEqual(state.pending, {
-        action: null,
-        state: null,
+        action: undefined,
+        state: undefined,
       }, 'Newly created models come without action data');
     });
 
@@ -31,8 +31,8 @@ function(QUnit, Action) {
           word: 'test'
         },
         pending: {
-          action: null,
-          state: null
+          action: undefined,
+          state: undefined
         }
       };
 
@@ -50,8 +50,8 @@ function(QUnit, Action) {
       var state = reducer(initialState, {type: 'base.append', payload: '+Z'});
 
       assert.strictEqual(state.state.word, 'test+Z');
-      assert.strictEqual(state.pending.action, null);
-      assert.strictEqual(state.pending.state, null);
+      assert.strictEqual(state.pending.action, undefined);
+      assert.strictEqual(state.pending.state, undefined);
     });
 
     QUnit.module('Staging action data');
@@ -60,8 +60,8 @@ function(QUnit, Action) {
       var pendingAction = 'word.edit';
       var oldState = { word : 'value' };
       var pending = {
-        action: null,
-        state: null
+        action: undefined,
+        state: undefined
       };
       var existing = {
         state: oldState,
@@ -113,7 +113,7 @@ function(QUnit, Action) {
       var reducer = Action.wrapReducer((s, a) => s)(existing, change);
 
       assert.strictEqual(reducer.pending.action, null);
-      assert.strictEqual(reducer.pending.state, null);
+      assert.strictEqual(reducer.pending.state, undefined);
       assert.strictEqual(reducer.state.word, 'newValue');
     });
 
@@ -137,7 +137,7 @@ function(QUnit, Action) {
       var reducer = Action.wrapReducer((s, a) => s)(existing, change);
 
       assert.strictEqual(reducer.pending.action, null);
-      assert.strictEqual(reducer.pending.state, null);
+      assert.strictEqual(reducer.pending.state, undefined);
       assert.strictEqual(reducer.state.word, 'value');
     });
   };

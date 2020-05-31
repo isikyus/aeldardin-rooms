@@ -15,10 +15,10 @@ function($) {
 
       // Set initial state
       state = state || {
-        state: null,
+        state: undefined,
         pending: {
-          action: null,
-          state: null
+          action: undefined,
+          state: undefined
         }
       };
 
@@ -36,8 +36,11 @@ function($) {
           return {
             state: state.pending.state,
             pending: {
+
+              // Set to null rather than undefined,
+              // as we _know_ no action is going on.
               action: null,
-              state: null
+              state: undefined
             }
           };
 
@@ -46,7 +49,7 @@ function($) {
             state: state.state,
             pending: {
               action: null,
-              state: null
+              state: undefined
             }
           };
 
