@@ -1,6 +1,9 @@
-define([],
-function() {
+define([
+  'redux'
+],
+function(Redux) {
 
+  // Helper function to allocate IDs.
   var nextId = function(thingsWithIds) {
     var existingIds = thingsWithIds.map(function(thing) {
       return thing.id;
@@ -11,21 +14,13 @@ function() {
     return maxId + 1;
   };
 
-  // Redux reducer for map data.
-  var reduce = function(state, action) {
+  var reduceRooms = function(state, action) {
+    state = state || [];
 
-    // Set initial state.
-    var initialState = {
-      rooms: [],
-      doors: []
-    };
-    state = state || initialState;
-
-    switch (action.type) {
-
+    switch(action.type) {
       case 'map.rooms.add':
         var newRoom = {
-          id: nextId(state.rooms),
+          id: nextId(state),
           x: action.payload.x,
           y: action.payload.y,
           width: action.payload.width,
@@ -44,24 +39,27 @@ function() {
           newRoom.height = -newRoom.height;
         }
 
-        return {
-          rooms: state.rooms.concat(newRoom),
-          doors: state.doors
-        };
+        return state.concat(newRoom);
 
       case 'map.rooms.remove':
         var idsToRemove = action.payload.roomIds;
-        var roomsAfterRemoval = state.rooms.filter(function(room) {
+        return state.filter(function(room) {
           return (idsToRemove.indexOf(room.id) < 0);
         });
-        return {
-          rooms: roomsAfterRemoval,
-          doors: state.doors
-        };
+
+      default:
+        return state;
+    }
+  }
+
+  var reduceDoors = function(state, action) {
+    state = state || [];
+
+    switch (action.type) {
 
       case 'map.doors.add':
         var newDoor = {
-          id: nextId(state.doors),
+          id: nextId(state),
           x: action.payload.x,
           y: action.payload.y,
           direction: action.payload.direction
@@ -69,20 +67,13 @@ function() {
 
         newDoor.style = action.payload.style || 'door';
 
-        return {
-          rooms: state.rooms,
-          doors: state.doors.concat(newDoor)
-        };
+        return state.concat(newDoor);
 
       case 'map.doors.remove':
         var idsToRemove = action.payload.doorIds;
-        var doorsAfterRemoval = state.doors.filter(function(door) {
+        return state.filter(function(door) {
           return (idsToRemove.indexOf(door.id) < 0);
         });
-        return {
-          rooms: state.rooms,
-          doors: doorsAfterRemoval
-        };
 
       default:
         return state;
@@ -150,7 +141,10 @@ console.log(exit);
   }
 
   return {
-    reduce: reduce,
+    reduce: Redux.combineReducers({
+                rooms: reduceRooms,
+                doors: reduceDoors
+            }),
     exits: exits
   };
 });
