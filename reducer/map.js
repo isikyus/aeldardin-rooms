@@ -19,27 +19,9 @@ function(Redux) {
 
     switch(action.type) {
       case 'map.rooms.add':
-        var newRoom = {
-          id: nextId(state),
-          x: action.payload.x,
-          y: action.payload.y,
-          width: action.payload.width,
-          height: action.payload.height
-        };
-
-        newRoom.key = action.payload.key || (newRoom.id + 1);
-
-        // Normalise width and height to be non-negative.
-        if(newRoom.width < 0) {
-          newRoom.x = newRoom.x + newRoom.width;
-          newRoom.width = -newRoom.width;
-        }
-        if(newRoom.height < 0) {
-          newRoom.y = newRoom.y + newRoom.height;
-          newRoom.height = -newRoom.height;
-        }
-
-        return state.concat(newRoom);
+        return state.concat(
+          buildRoom(nextId(state), action.payload)
+        );
 
       case 'map.rooms.remove':
         return removeById(state, action.payload.roomIds);
@@ -48,6 +30,30 @@ function(Redux) {
         return state;
     }
   }
+
+  var buildRoom = function(id, roomData) {
+    var room = {
+      id: id,
+      x: roomData.x,
+      y: roomData.y,
+      width: roomData.width,
+      height: roomData.height
+    };
+
+    room.key = roomData.key || (room.id + 1);
+
+    // Normalise width and height to be non-negative.
+    if(room.width < 0) {
+      room.x = room.x + room.width;
+      room.width = -room.width;
+    }
+    if(room.height < 0) {
+      room.y = room.y + room.height;
+      room.height = -room.height;
+    }
+
+    return room;
+  };
 
   var reduceDoors = function(state, action) {
     state = state || [];
