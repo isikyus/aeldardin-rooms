@@ -2,34 +2,136 @@ define([
   'redux'
 ],
 function(Redux) {
-
-  // Helper function to allocate IDs.
-  var nextId = function(thingsWithIds) {
-    var existingIds = thingsWithIds.map(function(thing) {
-      return thing.id;
-    });
-
-    // Ensure we always start with at least ID 0 (avoids starting at -Infinity).
-    var maxId = Math.max.apply(Math, existingIds.concat(-1));
-    return maxId + 1;
-  };
-
   var reduceRooms = function(state, action) {
-    state = state || [];
+    state = state || {
+      points: [],
+      edges: [],
+      rooms: [],
+      nonRoom: {
+        edgeLoops: []
+      }
+    };
 
     switch(action.type) {
       case 'map.rooms.add':
-        return state.concat(
-          buildRoom(nextId(state), action.payload)
-        );
+        return addRoom(state, action.payload);
 
       case 'map.rooms.remove':
-        return removeById(state, action.payload.roomIds);
+        // TODO: return removeById(state, action.payload.roomIds);
 
       default:
         return state;
     }
-  }
+  };
+
+  // TODO: should be more functional, not mutate the state.
+  var addRoom = function(state, data) {
+    var x1 = data.x,
+        y1 = data.y,
+        x2 = x1 + data.width,
+        y2 = y1 + data.height,
+        newPoints = state.points,
+        pointIds = [],
+        newEdges = [],
+        coordinates = [
+          [x1, y1],
+          [x2, y1],
+          [x2, y2],
+          [x1, y2]
+        ],
+        newRoomId = state.rooms.length;
+
+    coordinates.forEach(function(point) {
+      update = findPoint(newPoints, point[0], point[1]);
+      newPoints = update[1];
+      pointIds = pointIds.concat(update[0]);
+    });
+
+    var lastForwardEdge = null,
+        lastReverseEdge = null,
+        lastReverseEdgeId = null;
+    for (var i = 0; i < pointIds.length; i++) {
+      var thisPointId = pointIds[i],
+          nextPointId = pointIds[(i + 1) % pointIds.length],
+          thisPoint = newPoints[thisPointId],
+          forwardEdgeId = newEdges.length + state.edges.length,
+          reverseEdgeId = forwardEdgeId + 1;
+
+      var newForwardEdge = {
+        from: thisPointId,
+        to: nextPointId,
+        opposite: reverseEdgeId,
+        onRight: newRoomId
+      }
+      var newReverseEdge = {
+        from: nextPointId,
+        to: thisPointId,
+        opposite: forwardEdgeId,
+        // TODO: connect to another room if it's on the right
+        onRight: -1
+      }
+      newEdges = newEdges.concat([newForwardEdge, newReverseEdge]);
+
+      if (lastForwardEdge) {
+        lastForwardEdge.next = forwardEdgeId;
+        lastReverseEdge.cw = forwardEdgeId;
+        newForwardEdge.cw = lastReverseEdgeId;
+        newReverseEdge.next = lastReverseEdgeId;
+      };
+
+      if (thisPoint.edge) {
+        throw "Cannot yet handle adding edges to existing points";
+      } else {
+        thisPoint.edge = forwardEdgeId;
+      }
+
+      lastForwardEdge = newForwardEdge;
+      lastReverseEdge = newReverseEdge;
+      lastReverseEdgeId = reverseEdgeId;
+    };
+
+    // Fill in connections between first and last edges.
+    var firstNewEdgeId = state.edges.length,
+        firstNewReverseId = firstNewEdgeId + 1;
+    lastForwardEdge.next = firstNewEdgeId;
+    lastReverseEdge.cw = firstNewEdgeId;
+    newEdges[0].cw = lastReverseEdgeId;
+    newEdges[1].next = lastReverseEdgeId;
+
+    return {
+      points: newPoints,
+      edges: state.edges.concat(newEdges),
+      rooms: state.rooms.concat({
+        edgeLoops: [firstNewEdgeId],
+        key: data.key || (newRoomId + 1).toString
+      }),
+      nonRoom: {
+        edgeLoops: state.nonRoom.edgeLoops.concat([firstNewReverseId])
+      }
+    };
+  };
+
+  // How close two points can be before we combine them into a single point.
+  // TODO: may want this editable or something.
+  var DELTA = 0.0001;
+
+  // Return the ID of an existing "close enough" point if there is one,
+  // or create a new one if not (and return its ID).
+  //
+  // @param points Current list of points
+  // @return [new point ID, updated list of points]
+  var findPoint = function(points, x, y) {
+    var existing = points.indexOf(function(point) {
+      return (Math.abs(point.x - x) < DELTA &&
+          Math.abs(point.y - y) < DELTA);
+    });
+
+    if (existing > 0) {
+      return [existing, points];
+    } else {
+      return [points.length, points.concat({x: x, y: y})];
+    }
+  };
 
   var buildRoom = function(id, roomData) {
     var room = {

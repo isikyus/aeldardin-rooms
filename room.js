@@ -1,54 +1,38 @@
 define([],
 function() {
 
-  // Return an object representing the walls of this room.
-  // Its keys are 'north', 'south', 'east', and 'west'.
-  //
-  // Each of these contains an object with the position
-  // (perpendicular to the wall) and length and start coordinate
-  // (parallel) of that wall, plus the direction it runs from: 
-  // 'east' for walls running east-west (keys 'north' and 'south',
-  // and 'north' for ralls running north-south).
-  // Walls also define 'perpendicularAxis' (used for 'position'),
-  // and 'parallelAxis' (used for 'start'); each one is either 'x' or 'y'.
-  //
-  // TODO: it's more general to represent directions as unit vectors rather than names, and avoids all this case-by-case stuff.
+  // Returns an array of coordinates for the corners of the given room
+  // (by ID) in the given map. This should be enough to draw or describe
+  // the walls.
 
-  walls = function(room) {
-    return {
-      north : {
-        parallelAxis: 'x',
-        perpendicularAxis: 'y',
-        position: room.y,
-        start: room.x,
-        length: room.width,
-        runsFrom: 'west'
-      },
-      south : {
-        parallelAxis: 'x',
-        perpendicularAxis: 'y',
-        position: room.y + room.height,
-        start: room.x,
-        length: room.width,
-        runsFrom: 'west'
-      },
-      east : {
-        parallelAxis: 'y',
-        perpendicularAxis: 'x',
-        position: room.x + room.width,
-        start: room.y,
-        length: room.height,
-        runsFrom: 'north'
-      },
-      west : {
-        parallelAxis: 'y',
-        perpendicularAxis: 'x',
-        position: room.x,
-        start: room.y,
-        length: room.height,
-        runsFrom: 'north'
-      }
-    };
+  var walls = function(map, roomId) {
+    var wallData = [],
+        edge;
+
+    map.rooms.rooms[roomId].edgeLoops.forEach(function(firstEdgeId) {
+      var edgeId = firstEdgeId,
+          edge,
+          startPoint,
+          endPoint;
+      do {
+        edge = map.rooms.edges[edgeId];
+        startPoint = map.rooms.points[edge.from];
+        endPoint = map.rooms.points[edge.to];
+
+        wallData = wallData.concat([
+          {
+            id: edgeId,
+            startX: startPoint.x,
+            startY: startPoint.y,
+            endX: endPoint.x,
+            endY: endPoint.y
+          }
+        ]);
+        edgeId = edge.next;
+      } while (firstEdgeId != edgeId);
+    });
+
+    return wallData;
   };
 
   return {
